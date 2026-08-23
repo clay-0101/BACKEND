@@ -20,5 +20,9 @@ app.post('/create',async(req, res)=>{
     
     res.send(newNote)
 })
+// app.get('/user/:id', async(req, res)=>{
+//     let note = await storyModel.findById(req.params.id)
+//     res.json(note)
+// })
 
 module.exports = app
