@@ -24,5 +24,9 @@ app.post('/create',async(req, res)=>{
 //     let note = await storyModel.findById(req.params.id)
 //     res.json(note)
 // })
+// app.get('/users', async(req, res)=>{
+//     let note = await User.find()
+//     res.json(note)
+// })
 
 module.exports = app
