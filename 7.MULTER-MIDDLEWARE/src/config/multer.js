@@ -11,4 +11,9 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({storage})
-module.exports = upload
+module.exports = upload 
+
+
+// ANOTHER METHOD WITH MEMORY STORAGE 
+
+// const storage = multer.diskStorage()
