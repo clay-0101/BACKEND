@@ -3,7 +3,10 @@ const upload = require('../config/multer')
 
 const router = express.Router()
 
+// For fetching single file
+// If You want to fetch multiple file replace (.single) with (.array)
 router.post('/',upload.single('image') , (req, res)=>{
+
     try {
      let body = req.body
      let file = req.file
