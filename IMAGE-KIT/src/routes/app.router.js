@@ -1,9 +1,10 @@
-const express  = require('express')
-const upload = require('../config/multer.config')
-const create = require('../controllers/user.controoler')
+import express from 'express'
+import upload from '../config/multer.config.js'
+import create from '../controllers/user.controoler.js'
 
 const router = express.Router()
 
-router.post('/create', upload.single('image'), create)
 
-module.exports = router
+router.post('/upld', upload.single('image'), create)
+
+export default router

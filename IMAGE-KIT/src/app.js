@@ -1,10 +1,10 @@
-const express = require('express')
-const userRoutes = require('./routes/app.router')
+import express from 'express'
+import router from './routes/app.router.js'
 
-const app = express()
 
+let app = express()
 app.use(express.json())
 
-app.use('/main', userRoutes)
+app.use('/file', router)
 
-module.exports = app
+export default app
