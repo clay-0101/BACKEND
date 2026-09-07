@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { registerUserController } from '../controller/authController'
+import userModel from '../models/user.model.js'
 
 export const verifyToken = async(req, res, next) => {
 
@@ -19,7 +19,7 @@ export const verifyToken = async(req, res, next) => {
         })
     }
 
-    let user = await registerUserController.findOne(data.id)
+    let user = await userModel.findById(data.id)
 
     req.user = user
     next()
@@ -30,10 +30,11 @@ export const isAdmin = async (req, res, next)=>{
     let {role} = req.user 
     
     if(role === 'admin'){
-        next()
+      return  next()
     }
 
     res.status(400).json({
         message : "Access Denied.."
     })
 }
+

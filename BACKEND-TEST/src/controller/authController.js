@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js"
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import productModel from "../models/product.model.js"
 
 export const registerUserController = async (req, res) => {
 
@@ -19,7 +20,7 @@ export const registerUserController = async (req, res) => {
             name,
             email,
             role,
-            password:  await bcrypt.hash(password, 10)
+            password: await bcrypt.hash(password, 10)
         })
 
         let token = jwt.sign(
@@ -67,26 +68,25 @@ export const loginUserController = async (req, res) => {
             return res.status(400).json({
                 message: "Invalid Password"
             })
-
-            let token = jwt.sign(
-                {
-                    id: isUserExist._id
-                },
-                process.env.JWT_SECRET
-            )
-
-            res.status(200).json({
-                message: "User Logged in Successfully...",
-                data: {
-                    user: {
-                        name: isUserExist.name,
-                        email: isUserExist.email,
-                        role: isUserExist.role
-                    },
-                    token
-                }
-            })
         }
+        let token = jwt.sign(
+            {
+                id: isUserExist._id
+            },
+            process.env.JWT_SECRET
+        )
+
+        res.status(200).json({
+            message: "User Logged in Successfully...",
+            data: {
+                user: {
+                    name: isUserExist.name,
+                    email: isUserExist.email,
+                    role: isUserExist.role
+                },
+                token
+            }
+        })
     } catch (error) {
         res.status(500).json({
             message: "Internal Server Error"
@@ -96,9 +96,27 @@ export const loginUserController = async (req, res) => {
 }
 
 
-const token = jwt.sign(
-    { 
-        id: user._id // payload (user info)
-    },
-     process.env.JWT_SECRET  // secret key;
-    )
+
+export const createProduct = async (req, res) => {
+
+    let { name, description, price, category, stock } = req.body
+
+    if (name.trim() === '' || description.trim() === '' || price === undefined || category.trim() === '' || stock === undefined) {
+        return res.status(400).json({
+            message: "Provide complete details of product.."
+        })
+    }
+
+    let product = await productModel.create({
+        name,
+        description,
+        price,
+        category,
+        stock
+    })
+
+    res.status(201).json({
+        message: "Product created Successfull..",
+        product
+    })
+}
