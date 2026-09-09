@@ -15,10 +15,14 @@ const userSchema = mongoose.Schema({
         match : [/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/ , "Invalid Email.."],
         unique : true
     },
-    
+
     password : {
         type : String,
         required : true,
+    },
+
+    refreshToken :{
+        type : String
     }
 })
 
