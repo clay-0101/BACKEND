@@ -2,14 +2,28 @@ import axios from 'axios'
 import { useAuth } from '../../context/AuthContext'
 
 const api = axios.create({
-    baseURL : 'http://localhost:5173',
+    baseURL : 'http://localhost:5173/api',
     withCredentials : true
 })
 
-const useApi = ()=>{
+export const useApi = ()=>{
     const {accessToken}  = useAuth()
 
-    if(!accessToken){
-        
-    }
+   
+        api.interceptors.request.use(
+            (config)=>{
+                
+                if(accessToken){
+                    config.headers.Authorization = `Bearer ${accessToken}`
+                }
+
+                return config
+            },
+            (error)=>{
+                return promise.reject(error)
+            }  
+        )
+
+        return api
+    
 }
