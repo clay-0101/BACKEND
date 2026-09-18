@@ -1,14 +1,22 @@
-import  {useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-const AllUrl = ({urlData}) => {
-
+const AllUrl = ({ urlData, getUrlData }) => {
 
     return (
         <div className='w-full max-w-4xl p-2 flex-col gap-2'>
             {urlData.map(url => {
                 return <div key={url._id} className='border border-neutral-200 p-2 flex gap-8 justify-evenly items-center'  >
-                    <a href={`${url.originalUrl}`} target='_blank'>{url.shortCode}</a>
+                    <a
+                        href={`http://localhost:5173/api/open/${url.shortCode}`}
+                        target='_blank'
+                        className='cursor-pointer'
+                        onClick={() => {
+                            setTimeout(()=>{
+                                getUrlData()
+                            },100)
+                        }}
+                    >{url.shortCode}</a>
                     <p className='truncate'>{url.originalUrl}</p>
                     <p >{url.clicks}</p>
 

@@ -2,13 +2,17 @@ import React from 'react'
 import axios from 'axios'
 import { useState } from 'react'
 
-const UrlInput = ({getUrlData}) => {
+const UrlInput = ({getUrlData,setCurrentUlr}) => {
     const [longUrl, setLongUrl] = useState('')
     async function sendLongUrl(){
 
         let response = await axios.post("http://localhost:5173/api/url",{
             url : longUrl
            
+        })
+        setCurrentUlr({
+            shortCode : response.data.data.shortCode,
+            originalUrl : response.data.data.originalUrl
         })
 
          getUrlData()
@@ -20,7 +24,7 @@ const UrlInput = ({getUrlData}) => {
             onChange={(e)=>{
                 setLongUrl(e.target.value)
             }}
-            className='w-full outline-none ' 
+            className='w-full outline-none  p-3.5 rounded' 
             type="url" placeholder='Enter Long Url' />
             <button 
             onClick={()=>{
