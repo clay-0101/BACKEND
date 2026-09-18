@@ -1,4 +1,4 @@
-
+import {ToastContainer} from 'react-toastify'
 import AllUrl from './feature/Get-Saved-Url/ui/AllUrl'
 import UrlInput from './feature/Create-Short-Url/ui/UrlInput'
 import { useState, useEffect } from 'react'
@@ -23,6 +23,7 @@ const App = () => {
 
   return (
     <div className=' h-screen flex flex-col gap-5 justify-center items-center'>
+      <ToastContainer/>
       <UrlInput getUrlData={getUrlData} setCurrentUlr={setCurrentUlr}/>
       <CurrentUrl currentUlr={currentUlr}/>
       <AllUrl  urlData={urlData} getUrlData={getUrlData}/>
