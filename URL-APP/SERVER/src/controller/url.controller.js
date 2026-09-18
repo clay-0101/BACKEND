@@ -1,5 +1,5 @@
-import urlModel from "../models/url.model"
-import { generateCode } from "../utils/generateCode"
+import urlModel from "../models/url.model.js"
+import { generateCode } from "../utils/generateCode.js"
 
 
 export const saveUrlController = async (req, res) => {
