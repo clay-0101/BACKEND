@@ -14,3 +14,7 @@ export async function uploadFile({ buffer, fileName }) {
 
     return response
 }
+
+export async function deleteFile(fileId){
+    await client.files.delete(fileId)
+}

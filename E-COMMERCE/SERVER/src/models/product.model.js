@@ -14,10 +14,21 @@ export const productSchema = new mongoose.Schema({
         maxLength: 500,
     },
     images: {
-        type: [String],
-        validate: {
-            validator: images => images.length === 5,
-            message: "A product can have five images required"
+        type: [
+            {
+                url: {
+                    type: String,
+                    required: true
+                },
+                fileId: {
+                    type: String,
+                    required: true
+                }
+            },
+        ],
+        validate : {
+            validator : images => images.length >= 1,
+            message : "At least one image is required"
         }
     },
 
@@ -63,3 +74,5 @@ export const productSchema = new mongoose.Schema({
 
 const productModel = mongoose.model("Products", productSchema)
 export default productModel
+
+
