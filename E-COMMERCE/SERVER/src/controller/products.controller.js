@@ -172,6 +172,20 @@ export const updataProductController = async (req, res) => {
             })
         }
 
+        //Delete old images from imgkit - find product -> check is product exists -> old img deleted
+        let product = await productModel.findById(productId)
+
+        if (!product) {
+            return res.status(404).json({
+                message: "No product found"
+            })
+        }
+
+        for(let image of product.images){
+            await deleteFile(image.fileId)
+        }
+
+        // set new images 
         for (let i = 0; i < req.files.length; i++) {
 
             let response = await uploadFile({
@@ -180,12 +194,12 @@ export const updataProductController = async (req, res) => {
             })
 
             fileData.push({
-                url : response.url,
-                fileId : response.fileId
+                url: response.url,
+                fileId: response.fileId
             })
         }
 
-        let updatedProduct = await productModel.findByIdAndUpdate(productId, {...updatedData, images: fileData }, { returnDocument: "after" })
+        let updatedProduct = await productModel.findByIdAndUpdate(productId, { ...updatedData, images: fileData }, { returnDocument: "after" })
 
         if (!updatedProduct) {
             return res.status(404).json({
