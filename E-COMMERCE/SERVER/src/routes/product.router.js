@@ -1,6 +1,6 @@
 import express, { json } from 'express'
 import { authenticate } from '../middlewares/auth.middleware.js'
-import { createProductController } from '../controller/products.controller.js'
+import { createProductController, deleteProductController, fetchProductsController, fetchSingleProductController, updataProductController } from '../controller/products.controller.js'
 import { productValidator } from '../validator/product.validator.js'
 import { upload } from '../config/multer.js'
 import { productDataParser } from '../middlewares/productDataParser.js'
@@ -12,5 +12,17 @@ router.post("/", authenticate,
     productDataParser,
     productValidator,
     createProductController)
+
+router.get("/", fetchProductsController)
+
+router.get("/:id", fetchSingleProductController)
+
+router.delete("/:id", authenticate ,deleteProductController)
+
+router.put("/:id", authenticate,
+     upload.array("images"),
+     productDataParser,
+     productValidator,
+     updataProductController)
 
 export default router
