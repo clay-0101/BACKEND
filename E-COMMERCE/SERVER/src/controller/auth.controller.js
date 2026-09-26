@@ -139,6 +139,13 @@ export const rotateTokensController = async (req, res) => {
 
         res.status(200).json({
             message: "Token rotated successfully",
+            data : {
+                user: {
+                    id : user._id,
+                    name : user.name,
+                    email : user.email
+                }
+            },
             accessToken: newAccessToken
         })
 
