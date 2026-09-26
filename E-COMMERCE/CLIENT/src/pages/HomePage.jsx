@@ -1,7 +1,12 @@
 import React from 'react'
 import homeImg from "../assets/home.png"
+import { useNavigate } from 'react-router'
+import publicApi from '../config/publicApi'
+
 
 const HomePage = () => {
+ let navigate =  useNavigate()
+
   return (
     <div className='h-full w-full'>
       <section className='relative h-full w-full'>
@@ -21,7 +26,11 @@ const HomePage = () => {
           <p className='mt-4 max-w-md text-sm text-white/80 sm:text-base'>
             Everyday pieces cut from honest fabric, built to hold their shape wash after wash.
           </p>
-          <button className='mt-8 bg-white px-7 py-3 text-sm font-medium text-black transition-colors hover:bg-white/90'>
+          <button 
+          onClick={()=>{
+            navigate("/products")
+          }}
+          className='mt-8 bg-white px-7 py-3 text-sm font-medium text-black transition-colors hover:bg-white/90'>
             Shop the collection
           </button>
         </div>

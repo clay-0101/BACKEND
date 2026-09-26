@@ -4,9 +4,9 @@ import { Outlet } from 'react-router'
 
 const App = () => {
   return (
-    <div className='flex h-screen w-screen flex-col overflow-hidden'>
+    <div className='relative h-screen w-screen overflow-hidden'>
       <Navbar />
-      <main className='min-h-0 flex-1'>
+      <main className='h-full w-full overflow-y-auto'>
         <Outlet />
       </main>
     </div>

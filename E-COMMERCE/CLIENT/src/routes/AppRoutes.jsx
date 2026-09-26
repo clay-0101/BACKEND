@@ -9,6 +9,7 @@ import publicApi from '../config/publicApi'
 import { useDispatch } from 'react-redux'
 import { setAuth } from '../features/auth/state/authSlice'
 import App from '../app/App'
+import ProductsPage from '../pages/ProductsPage'
 
 
 
@@ -44,6 +45,10 @@ const AppRoutes = () => {
                 {
                     path : "/",
                     element : <HomePage/>
+                },
+                {
+                    path : "/products",
+                    element : <ProductsPage/>
                 }
             ]
         },

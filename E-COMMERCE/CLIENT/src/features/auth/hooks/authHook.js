@@ -1,15 +1,32 @@
-import { loginApi, registerApi } from "../api/authApi"
+import { loginApi, registerApi, useLogoutApi } from "../api/authApi"
 import { useForm } from "react-hook-form"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { setAuth } from "../state/authSlice"
 import toast from "react-hot-toast"
 import { useNavigate } from "react-router"
+import { useState } from "react"
 
 
 const useAuth = () => {
     let { reset, register, handleSubmit, getValues, formState: { errors } } = useForm({ mode: "onChange" })
     let dispatch = useDispatch()
    let navigate = useNavigate()
+
+ let logoutApi = useLogoutApi()
+
+  const user = useSelector((state) => state.auth.user)
+  const [showInfo, setShowInfo] = useState(false)
+
+ 
+  const handleLogout = async () => {
+    try {
+      let response = await logoutApi()
+      toast.success(response.data.message)
+      navigate("/login")
+    } catch (error) {
+      toast.error(error.response.data.message)
+    }
+  }
 
 
     const registerSubmitHandler = async (data) => {
@@ -47,7 +64,9 @@ const useAuth = () => {
 
     return {
         reset, register, handleSubmit, getValues, errors,
-        registerSubmitHandler, loginSubmitHandler
+        registerSubmitHandler, loginSubmitHandler,
+
+        user,showInfo, setShowInfo,handleLogout , navigate
     }
 }
 
