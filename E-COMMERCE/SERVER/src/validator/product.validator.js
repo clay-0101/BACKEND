@@ -1,4 +1,4 @@
-import { body, validationResult } from 'express-validator'
+import { body, param, validationResult } from 'express-validator'
 
 export const productValidator = [
 
@@ -73,4 +73,24 @@ export const productValidator = [
         
         next()
     }
+]
+
+export const idValidator = [
+    param("id")
+    .exists().withMessage("Product id is required")
+    .isMongoId().withMessage("Provide a valid id"),
+
+    (req, res , next) => {
+        let errors = validationResult(req) 
+
+        if(!errors.isEmpty()){
+            return res.status(401).json({
+                message : "Validation Failed",
+                error : errors.array()
+            })
+        }
+
+        next()
+    }
+
 ]

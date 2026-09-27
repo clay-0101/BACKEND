@@ -1,24 +1,26 @@
 import React, { use, useState } from 'react'
 import { Plus, User, LogOut } from 'lucide-react'
-import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router'
-import { useLogoutApi } from '../features/auth/api/authApi'
-import toast from 'react-hot-toast'
 import useAuth from '../features/auth/hooks/authHook'
+import { useDispatch } from 'react-redux'
+import { setShowForm } from '../features/products/state/productSlice'
+import toast from 'react-hot-toast'
 
 const Navbar = () => {
 
-let { user,showInfo, setShowInfo,handleLogout , navigate} = useAuth()
+let { user,showInfo, setShowInfo,handleLogout , navigate , dispatch, isAuthenticated} = useAuth()
   
   return (
-    <nav className='fixed inset-x-0 top-0 z-20 flex items-center justify-between border-b border-white/10 bg-[#7572705e] px-6 py-4 backdrop-blur-md sm:px-10'>
+    <nav className='sticky inset-x-0 top-0 z-20 flex items-center justify-between border-b border-white/10 bg-[#4b4a495e] px-6 py-4 backdrop-blur-md sm:px-10'>
       <span className='font-serif text-2xl text-white'>Stitchery</span>
 
       <div className='flex items-center gap-3'>
         <button
           onClick={() => {
-            if (!user) {
+            if (!isAuthenticated) {
               navigate("/login")
+              toast.error("Access limited to signed‑in users")
+            }else{
+              dispatch(setShowForm(true))
             }
           }}
           className='flex items-center gap-2 bg-white/90 px-4 py-2 text-sm font-medium text-[#161512] transition-colors hover:bg-white'>
@@ -34,17 +36,17 @@ let { user,showInfo, setShowInfo,handleLogout , navigate} = useAuth()
             title='Account'
             className='flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-white/80 hover:border-white/50 hover:text-white'
           >
-            {user ? <span className='text-sm'>{user.name[0]}</span> : <User size={18} />}
+            {isAuthenticated ? <span className='text-sm'>{user.name[0]}</span> : <User size={18} />}
           </button>
 
           {showInfo && (
             <div className='absolute right-0 top-full mt-2 whitespace-nowrap border border-white/15 bg-[#161512] px-4 py-2 text-sm text-white'>
-              {user ? user.name : "Guest"}
+              {isAuthenticated ? user.name : "Guest"}
             </div>
           )}
         </div>
 
-        {user ? (
+        {isAuthenticated ? (
           <button
             onClick={handleLogout}
             title='Logout'

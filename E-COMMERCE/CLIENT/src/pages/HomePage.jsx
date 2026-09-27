@@ -1,7 +1,6 @@
-import React from 'react'
 import homeImg from "../assets/home.png"
 import { useNavigate } from 'react-router'
-import publicApi from '../config/publicApi'
+
 
 
 const HomePage = () => {

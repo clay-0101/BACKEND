@@ -25,12 +25,12 @@ let {register, handleSubmit, getValues, errors, registerSubmitHandler  } =  useA
             {...register("name", {
               required: "Name is required",
               minLength: {
-                value: 2,
+                value: 3,
                 message: "Minimum 3 letters are required"
               },
               maxLength: {
-                value: 100,
-                message: "Name must be at most 100 letters"
+                value: 50,
+                message: "Name must be at most 50 letters"
               }
             })}
             type="text"

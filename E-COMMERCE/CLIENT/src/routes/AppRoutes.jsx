@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux'
 import { setAuth } from '../features/auth/state/authSlice'
 import App from '../app/App'
 import ProductsPage from '../pages/ProductsPage'
+import ProductDetailPage from '../pages/ProductDetailPage'
 
 
 
@@ -49,6 +50,10 @@ const AppRoutes = () => {
                 {
                     path : "/products",
                     element : <ProductsPage/>
+                },
+                {
+                    path : "/products/:id",
+                    element : <ProductDetailPage/>
                 }
             ]
         },

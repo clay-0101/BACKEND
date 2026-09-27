@@ -23,8 +23,12 @@ export const useLogoutApi = () => {
     let privateApi = usePrivateApi()
 
     const logout = async () => {
-      let response =  await privateApi.post("/auth/logout")
-      return response
+        try {
+            let response = await privateApi.post("/auth/logout")
+            return response
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return logout
