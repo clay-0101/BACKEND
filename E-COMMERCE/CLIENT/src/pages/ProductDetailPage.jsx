@@ -5,18 +5,19 @@ import useProduct from '../features/products/hooks/productHook'
 import { useSingleProductApi } from '../features/products/api/productApis'
 import { useMutation } from '@tanstack/react-query'
 import useAuth from '../features/auth/hooks/authHook'
+import { setSingleProduct } from '../features/products/state/productSlice'
 
 
 export default function ProductDetailPage() {
 
 
-    let { mainImage, setMainImage, selectedSize, setSelectedSize, product, id, dispatch, navigate, deleteProduct, isAuthenticated } = useProduct()
+    let { mainImage, setMainImage, selectedSize, setSelectedSize, product, id, dispatch, navigate, deleteProduct, isAuthenticated , updateDataHandler} = useProduct()
     let getProduct = useSingleProductApi()
     let { fetchProducts } = useAuth()
+
+    
     useEffect(() => {
-
         getProduct(id)
-
     }, [id, dispatch])
 
 
@@ -31,6 +32,7 @@ export default function ProductDetailPage() {
         mutationFn: () =>   deleteProduct(id),
         onSuccess: async() => {
             await fetchProducts()
+            dispatch(setSingleProduct(null))
             navigate('/products')
         }
     })
@@ -56,7 +58,9 @@ export default function ProductDetailPage() {
             )}
 
             <button
-                onClick={() => navigate("/products")}
+                onClick={() => {
+                    dispatch(setSingleProduct(null))
+                    navigate("/products")}}
                 className='border border-stone-500 p-2 md:p-3 cursor-pointer rounded-full mb-6'>
                 <MoveLeft className='w-4 h-4 md:w-5 md:h-5' />
             </button>
@@ -125,7 +129,13 @@ export default function ProductDetailPage() {
 
                     <div className='mt-10 flex gap-2.5 pt-2 '>
                         <button
-                            onClick={() => onEdit?.(product)}
+                            onClick={() => {
+                                if(isAuthenticated){
+                                    updateDataHandler()
+                                }else{
+                                    toast.error("Access limited to signed‑in users")
+                                }
+                            }}
                             className='flex flex-1 items-center cursor-pointer  justify-center gap-1.5 border border-stone-900 py-2 text-xs font-medium text-stone-900 hover:bg-stone-900 hover:text-stone-300'
                         >
                             <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' className='h-3.5 w-3.5'>

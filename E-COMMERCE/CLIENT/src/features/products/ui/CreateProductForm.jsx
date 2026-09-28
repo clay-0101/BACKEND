@@ -1,28 +1,20 @@
-import { MoveLeft } from 'lucide-react'
 import React from 'react'
-import { usePrivateApi } from '../../../config/privateApi'
+import { MoveLeft } from 'lucide-react'
 import useProduct from '../hooks/productHook'
-import { setProducts, setShowForm } from '../state/productSlice'
-import { useForm } from 'react-hook-form'
-import { useMutation } from '@tanstack/react-query'
-import publicApi from '../../../config/publicApi'
-import useAuth from '../../auth/hooks/authHook'
+import { setShowForm } from '../state/productSlice'
+
+
+
+
+
 
 const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL"]
 
 const CreateProductForm = () => {
-    let { register, handleSubmit, reset, formState: { errors } } = useForm()
-    let { dispatch, createProduct } = useProduct()
-    let {fetchProducts} = useAuth()
+
+    let { dispatch, dataSubmitHandler, isPending, register, handleSubmit, errors, isEditProdcut, isUpdating } = useProduct()
 
 
-    let { mutate: handleCreateProduct, isPending } = useMutation({
-        mutationFn: (dataToSubmit) => createProduct(dataToSubmit),
-        onSuccess: async () => {
-            await fetchProducts()
-            dispatch(setShowForm(false))
-        }
-    })
     return (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4 py-10 sm:px-8'>
             {isPending && (
@@ -30,6 +22,14 @@ const CreateProductForm = () => {
                     <div className="flex flex-col items-center">
                         <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                         <p className="mt-3 text-white text-sm">Creating product...</p>
+                    </div>
+                </div>
+            )}
+            {isUpdating && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <p className="mt-3 text-white text-sm">Updating product...</p>
                     </div>
                 </div>
             )}
@@ -45,25 +45,11 @@ const CreateProductForm = () => {
                     <MoveLeft size={18} />
                 </button>
 
-                <h2 className='font-serif text-2xl text-[#161512]'>Create Product</h2>
-                <p className='mt-1 mb-8 text-sm text-stone-500'>Add a new product to your store</p>
+                <h2 className='font-serif text-2xl text-[#161512]'>{isEditProdcut ? "Update Product" : "Create Product"}</h2>
+                <p className='mt-1 mb-8 text-sm text-stone-500'>{isEditProdcut ? "Note: Product updates don’t keep old images, upload new ones." : "Add a new product to your store"}</p>
 
                 <form
-                    onSubmit={handleSubmit((data) => {
-                        let formData = new FormData()
-                        formData.append("title", data.title)
-                        formData.append("description", data.description)
-
-                        formData.append("price", JSON.stringify(data.price))
-                        formData.append("sizes", JSON.stringify(data.sizes.filter((s) => s.size)))
-
-                        Array.from(data.images).forEach((file) => {
-                            formData.append("images", file)
-                        })
-
-                        handleCreateProduct(formData)
-
-                    })}
+                    onSubmit={handleSubmit(dataSubmitHandler)}
                     className='grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-5'>
 
 
@@ -170,36 +156,39 @@ const CreateProductForm = () => {
                                     <div key={size} className='flex items-center gap-2 border border-stone-300 px-3 py-2'>
                                         <input
                                             {...register(`sizes.${idx}.size`, {
-                                                required: "Size is required"
+
                                             })}
                                             type='checkbox' value={size} />
 
                                         <span className='w-8 text-sm'>{size}</span>
                                         <input
                                             {...register(`sizes.${idx}.stock`, {
-                                                required: "Stock is required",
                                                 valueAsNumber: true
                                             })}
                                             type='number'
-                                            defaultValue={0}
                                             placeholder='Stock'
                                             min={0}
                                             className='w-full border-l border-stone-300 pl-2 text-sm outline-none'
                                         />
                                     </div>
                                 ))}
-                                {errors.sizes && (<p className="text-[12px] text-red-500">
+                                {errors.sizes?.length && (<p className="text-[12px] text-red-500">
                                     Please select the sizes you want. If you don’t enter stock, it will stay 0 by default and won’t be shown.
                                 </p>)}
                             </div>
                         </div>
 
-                        <button
+                        {isEditProdcut ? <button
+                            type='submit'
+                            className='w-full bg-[#345cbb] py-3 text-sm font-medium text-white hover:bg-[#1d49b0]'
+                        >
+                            Update Product
+                        </button> : <button
                             type='submit'
                             className='w-full bg-[#161512] py-3 text-sm font-medium text-white hover:bg-black'
                         >
                             Create Product
-                        </button>
+                        </button>}
                     </div>
 
                 </form>

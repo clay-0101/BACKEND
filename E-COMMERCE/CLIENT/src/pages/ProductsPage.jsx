@@ -19,7 +19,7 @@ const ProductsPage = () => {
 
 
     return (
-        <div className='min-h-0 bg-stone-50'>
+        <div className='min-h-0 '>
             <div className='px-6 sm:px-10'>
                 <button
                     onClick={() => {
@@ -31,16 +31,24 @@ const ProductsPage = () => {
                 <h1 className='font-serif text-3xl text-stone-900'>Products</h1>
             </div>
 
-            <div className='grid grid-cols-1 gap-7 px-6 py-8 sm:grid-cols-2 sm:px-10 lg:grid-cols-4 '>
-                {products?.map((product) => (
-                    <ProductCard
-                        key={product._id}
-                        product={product}
-                        onEdit={(p) => console.log("edit", p)}
-                        onDelete={(p) => console.log("delete", p)}
-                    />
-                ))}
-            </div>
+            {products?.length === 0 ? (
+                <div className='flex flex-col items-center justify-center px-6 py-24 text-center sm:px-10'>
+                    <h2 className='font-serif text-2xl text-stone-900'>No products yet</h2>
+                    <p className='mt-2 max-w-md text-stone-500'>
+                        It's empty here. There are no products right now. Click the
+                        "Create Product" button in the navbar to add your first product.
+                    </p>
+                </div>
+            ) : (
+                <div className='grid grid-cols-1 gap-7 px-6 py-8 sm:grid-cols-2 sm:px-10 lg:grid-cols-4 '>
+                    {products?.map((product) => (
+                        <ProductCard
+                            key={product._id}
+                            product={product}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

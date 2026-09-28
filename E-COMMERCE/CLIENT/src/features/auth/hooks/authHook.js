@@ -39,6 +39,7 @@ const useAuth = () => {
             return response.data
         } catch (error) {
             console.log("failed to fetch products")
+            dispatch(setProducts([]))
         }
     }
 

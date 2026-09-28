@@ -61,14 +61,14 @@ export const fetchProductsController = async (req, res) => {
     try {
         let products = await productModel.find()
 
-        if (products.length === 0) {
-            return res.status(404).json({
-                message: "No product found",
-                data : {
-                    products
-                }
-            })
-        }
+        // if (products.length === 0) {fetchProductsController sends a 404 even when the list is empty, so the frontend's fetchProducts() hits its catch block and never dispatches setProducts([]) — leaving the stale (old) product list in Redux state after delete.
+        //     return res.status(404).json({
+        //         message: "No product found",
+        //         data : {
+        //             products
+        //         }
+        //     })
+        // }
 
         res.status(200).json({
             message: "All products fetched..",

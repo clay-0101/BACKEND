@@ -2,13 +2,13 @@ import React, { use, useState } from 'react'
 import { Plus, User, LogOut } from 'lucide-react'
 import useAuth from '../features/auth/hooks/authHook'
 import { useDispatch } from 'react-redux'
-import { setShowForm } from '../features/products/state/productSlice'
+import { setEditProduct, setShowForm } from '../features/products/state/productSlice'
 import toast from 'react-hot-toast'
 
 const Navbar = () => {
 
-let { user,showInfo, setShowInfo,handleLogout , navigate , dispatch, isAuthenticated} = useAuth()
-  
+  let { user, showInfo, setShowInfo, handleLogout, navigate, dispatch, isAuthenticated } = useAuth()
+
   return (
     <nav className='sticky inset-x-0 top-0 z-20 flex items-center justify-between border-b border-white/10 bg-[#4b4a495e] px-6 py-4 backdrop-blur-md sm:px-10'>
       <span className='font-serif text-2xl text-white'>Stitchery</span>
@@ -16,11 +16,12 @@ let { user,showInfo, setShowInfo,handleLogout , navigate , dispatch, isAuthentic
       <div className='flex items-center gap-3'>
         <button
           onClick={() => {
-            if (!isAuthenticated) {
+            if (isAuthenticated) {
+              dispatch(setEditProduct(null))
+              dispatch(setShowForm(true))
+            } else {
               navigate("/login")
               toast.error("Access limited to signed‑in users")
-            }else{
-              dispatch(setShowForm(true))
             }
           }}
           className='flex items-center gap-2 bg-white/90 px-4 py-2 text-sm font-medium text-[#161512] transition-colors hover:bg-white'>
