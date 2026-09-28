@@ -89,8 +89,11 @@ const useProduct = () => {
     })
 
     const dataSubmitHandler = (data) => {
-
-        let selectedSizes = data.sizes.filter((s) => s.size && s.stock > 0)
+        const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL"]
+        let selectedSizes = data.sizes
+            .map((s, idx) => ({ size: sizeOptions[idx], stock: s.stock, checked: !!s.size }))
+            .filter((s) => s.checked && s.stock > 0)
+            .map(({ size, stock }) => ({ size, stock }))
 
         if (selectedSizes.length === 0) {
             toast.error("Please select at least one size with stock")
@@ -141,7 +144,7 @@ const useProduct = () => {
         createProduct, deleteProduct, isAuthenticated,
 
         dataSubmitHandler, isPending, register, handleSubmit, errors, updateDataHandler, isEditProdcut
-        ,isUpdating
+        , isUpdating
     }
 }
 

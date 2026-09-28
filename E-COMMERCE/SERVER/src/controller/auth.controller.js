@@ -68,11 +68,12 @@ export const loginUserController = async (req, res) => {
 
         await userModel.findByIdAndUpdate(user._id, { refreshToken })
 
-        res.cookie("refreshToken", refreshToken,
-            {
-                httpOnly: true,
-                maxAge: 7 * 24 * 60 * 60 * 1000
-            })
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
 
         res.status(200).json({
             message: "User logged in successfully",
@@ -130,20 +131,20 @@ export const rotateTokensController = async (req, res) => {
 
         await userModel.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken })
 
-        res.cookie("refreshToken", newRefreshToken,
-            {
-                httpOnly: true,
-                maxAge: 7 * 24 * 60 * 60 * 1000
-            }
-        )
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        })
 
         res.status(200).json({
             message: "Token rotated successfully",
-            data : {
+            data: {
                 user: {
-                    id : user._id,
-                    name : user.name,
-                    email : user.email
+                    id: user._id,
+                    name: user.name,
+                    email: user.email
                 }
             },
             accessToken: newAccessToken
@@ -206,7 +207,7 @@ export const logoutUserController = async (req, res) => {
             })
         }
 
-        let user =  await userModel.findByIdAndUpdate(id, { refreshToken: null })
+        let user = await userModel.findByIdAndUpdate(id, { refreshToken: null })
 
         if (!user) {
             return res.status(404).json({
@@ -215,7 +216,9 @@ export const logoutUserController = async (req, res) => {
         }
 
         res.clearCookie("refreshToken", {
-            httpOnly : true,
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
         })
 
         res.status(200).json({
@@ -224,8 +227,8 @@ export const logoutUserController = async (req, res) => {
 
     } catch (error) {
         return res.status(500).json({
-            message : "Internal server error",
-            error : error.message 
+            message: "Internal server error",
+            error: error.message
         })
     }
 }
