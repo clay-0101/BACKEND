@@ -22,17 +22,6 @@ const useAuth = () => {
     const [showInfo, setShowInfo] = useState(false)
 
 
-    const handleLogout = async () => {
-        try {
-            let response = await logoutApi()
-            dispatch(setUserLogout())
-            toast.success(response.data.message)
-            navigate("/login")
-        } catch (error) {
-            toast.error(error?.response?.data?.message || "Something went wrong")
-        }
-    }
-
     const fetchProducts = async () => {
         try {
             let response = await publicApi.get("/products")
@@ -74,6 +63,19 @@ const useAuth = () => {
         }
     })
 
+    // ---- LOGOUT mutation ----
+    let { mutate: handleLogout, isPending: isLoggingOut } = useMutation({
+        mutationFn: () => logoutApi(),
+        onSuccess: (response) => {
+            dispatch(setUserLogout())
+            toast.success(response.data.message)
+            navigate("/login")
+        },
+        onError: (error) => {
+            toast.error(error?.response?.data?.message || "Something went wrong")
+        }
+    })
+
     const registerSubmitHandler = (data) => {
         handleRegister(data)
     }
@@ -88,7 +90,7 @@ const useAuth = () => {
 
         user, showInfo, setShowInfo, handleLogout, navigate, dispatch, fetchProducts,
 
-        isLoginPending, isRegisterPending
+        isLoginPending, isRegisterPending, isLoggingOut
     }
 }
 

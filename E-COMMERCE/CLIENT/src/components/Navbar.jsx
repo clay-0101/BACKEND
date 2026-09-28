@@ -1,5 +1,5 @@
-import React, { use, useState } from 'react'
-import { Plus, User, LogOut } from 'lucide-react'
+import React, { useState } from 'react'
+import { Plus, User, LogOut, Loader2 } from 'lucide-react'
 import useAuth from '../features/auth/hooks/authHook'
 import { useDispatch } from 'react-redux'
 import { setEditProduct, setShowForm } from '../features/products/state/productSlice'
@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 
 const Navbar = () => {
 
-  let { user, showInfo, setShowInfo, handleLogout, navigate, dispatch, isAuthenticated } = useAuth()
+  let { user, showInfo, setShowInfo, handleLogout, navigate, dispatch, isAuthenticated, isLoggingOut } = useAuth()
 
   return (
     <nav className='sticky inset-x-0 top-0 z-20 flex items-center justify-between border-b border-white/10 bg-[#4b4a495e] px-6 py-4 backdrop-blur-md sm:px-10'>
@@ -49,11 +49,12 @@ const Navbar = () => {
 
         {isAuthenticated ? (
           <button
-            onClick={handleLogout}
+            onClick={() => handleLogout()}
+            disabled={isLoggingOut}
             title='Logout'
-            className='flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-white/80 hover:border-white/50 hover:text-white'
+            className='flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-white/80 hover:border-white/50 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            <LogOut size={18} />
+            {isLoggingOut ? <Loader2 size={18} className='animate-spin' /> : <LogOut size={18} />}
           </button>
         ) : (
           <button
