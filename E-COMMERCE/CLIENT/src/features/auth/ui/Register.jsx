@@ -5,7 +5,7 @@ import useAuth from "../hooks/authHook"
 
 const Register = () => {
 
-let {register, handleSubmit, getValues, errors, registerSubmitHandler  } =  useAuth()
+  let { register, handleSubmit, getValues, errors, registerSubmitHandler, isRegisterPending } = useAuth()
 
   return (
     <div className='w-full max-w-sm'>
@@ -98,8 +98,9 @@ let {register, handleSubmit, getValues, errors, registerSubmitHandler  } =  useA
 
         <button
           type="submit"
-          className='w-full bg-black text-white py-2 text-sm mt-2 hover:bg-gray-900'>
-          Register
+          disabled={isRegisterPending}
+          className='w-full bg-black text-white py-2 text-sm mt-2 hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed'>
+          {isRegisterPending ? "Registering..." : "Register"}
         </button>
 
       </form>

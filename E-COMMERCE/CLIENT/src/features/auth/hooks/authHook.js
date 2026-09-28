@@ -5,6 +5,7 @@ import { setAuth, setUserLogout } from "../state/authSlice"
 import toast from "react-hot-toast"
 import { useNavigate } from "react-router"
 import { useState } from "react"
+import { useMutation } from "@tanstack/react-query"
 import { setProducts } from "../../products/state/productSlice"
 import publicApi from "../../../config/publicApi"
 
@@ -28,7 +29,7 @@ const useAuth = () => {
             toast.success(response.data.message)
             navigate("/login")
         } catch (error) {
-            toast.error(error.response.data.message)
+            toast.error(error?.response?.data?.message || "Something went wrong")
         }
     }
 
@@ -43,44 +44,51 @@ const useAuth = () => {
         }
     }
 
-    const registerSubmitHandler = async (data) => {
-
-        try {
-            let response = await registerApi(data)
+    // ---- REGISTER mutation ----
+    let { mutate: handleRegister, isPending: isRegisterPending } = useMutation({
+        mutationFn: (data) => registerApi(data),
+        onSuccess: (response) => {
             toast.success(response.data.message)
-
             reset()
-
             navigate("/login")
-        } catch (error) {
-            toast.error(error.response.data.message)
+        },
+        onError: (error) => {
+            toast.error(error?.response?.data?.message || "Something went wrong")
         }
-    }
+    })
 
-    const loginSubmitHandler = async (data) => {
-
-        try {
-            let response = await loginApi(data)
-
+    // ---- LOGIN mutation ----
+    let { mutate: handleLogin, isPending: isLoginPending } = useMutation({
+        mutationFn: (data) => loginApi(data),
+        onSuccess: (response) => {
             toast.success(response.data.message)
-
             dispatch(setAuth({
                 user: response.data.data,
                 accessToken: response.data.accessToken
             }))
-
             reset()
             navigate("/")
-        } catch (error) {
-            toast.error(error.response.data.message)
+        },
+        onError: (error) => {
+            toast.error(error?.response?.data?.message || "Something went wrong")
         }
+    })
+
+    const registerSubmitHandler = (data) => {
+        handleRegister(data)
+    }
+
+    const loginSubmitHandler = (data) => {
+        handleLogin(data)
     }
 
     return {
         reset, register, handleSubmit, getValues, errors,
         registerSubmitHandler, loginSubmitHandler, isAuthenticated,
 
-        user, showInfo, setShowInfo, handleLogout, navigate, dispatch, fetchProducts
+        user, showInfo, setShowInfo, handleLogout, navigate, dispatch, fetchProducts,
+
+        isLoginPending, isRegisterPending
     }
 }
 

@@ -58,6 +58,7 @@ const useProduct = () => {
             throw error
         }
     }
+    
     let updateProduct = async (updatedFormData) => {
         try {
             let response = await privateApi.put(`/products/${id}`, updatedFormData)
@@ -70,6 +71,7 @@ const useProduct = () => {
     }
 
 
+    // create product mutation
     let { mutate: handleCreateProduct, isPending } = useMutation({
         mutationFn: (dataToSubmit) => createProduct(dataToSubmit),
         onSuccess: async () => {
@@ -81,6 +83,7 @@ const useProduct = () => {
         }
     })
 
+    //update mutation
     let { mutate: handleUpdateProduct, isPending: isUpdating } = useMutation({
         mutationFn: (dataToSubmit) => updateProduct(dataToSubmit),
         onSuccess: async () => {
@@ -117,10 +120,7 @@ const useProduct = () => {
         } else {
             handleCreateProduct(formData)
         }
-
-
         reset()
-
     }
 
     const updateDataHandler = () => {

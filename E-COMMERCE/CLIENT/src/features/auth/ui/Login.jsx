@@ -4,7 +4,7 @@ import { Link } from "react-router"
 import useAuth from '../hooks/authHook'
 
 const Login = () => {
- let { register, handleSubmit, errors ,loginSubmitHandler} = useAuth()
+  let { register, handleSubmit, errors, loginSubmitHandler, isLoginPending } = useAuth()
   return (
     <div className='w-full max-w-sm'>
 
@@ -12,8 +12,8 @@ const Login = () => {
       <p className='text-sm text-gray-500 mb-8'>Login to your account</p>
 
       <form
-      onSubmit={handleSubmit(loginSubmitHandler)}
-       className='flex flex-col gap-5'>
+        onSubmit={handleSubmit(loginSubmitHandler)}
+        className='flex flex-col gap-5'>
 
         <div className='flex flex-col gap-1'>
           <label className='text-sm text-black'>Email</label>
@@ -51,9 +51,10 @@ const Login = () => {
 
         <button
           type="submit"
-          className='w-full bg-black text-white py-2 text-sm mt-2 hover:bg-gray-900'
+          disabled={isLoginPending}
+          className='w-full bg-black text-white py-2 text-sm mt-2 hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed'
         >
-          Login
+          {isLoginPending ? "Logging in..." : "Login"}
         </button>
 
       </form>
