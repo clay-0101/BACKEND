@@ -72,6 +72,7 @@ export const loginUserController = async (req, res) => {
             httpOnly: true,
             secure: true,
             sameSite: "none",
+            path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
@@ -119,7 +120,12 @@ export const rotateTokensController = async (req, res) => {
         if (user.refreshToken !== refreshToken) {
 
             await userModel.findByIdAndUpdate(user._id, { refreshToken: null })
-            res.clearCookie("refreshToken")
+            res.clearCookie("refreshToken", {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none",
+                path: "/"
+            })
 
             return res.status(401).json({
                 message: "Token reuse/mismatch detected. Please log in again."
@@ -131,10 +137,11 @@ export const rotateTokensController = async (req, res) => {
 
         await userModel.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken })
 
-        res.cookie("refreshToken", refreshToken, {
+        res.cookie("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: true,
             sameSite: "none",
+            path: "/",
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
 
@@ -218,7 +225,8 @@ export const logoutUserController = async (req, res) => {
         res.clearCookie("refreshToken", {
             httpOnly: true,
             secure: true,
-            sameSite: "none"
+            sameSite: "none",
+            path: "/"
         })
 
         res.status(200).json({
