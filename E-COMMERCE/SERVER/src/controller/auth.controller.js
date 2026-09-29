@@ -116,37 +116,18 @@ export const rotateTokensController = async (req, res) => {
             })
         }
 
-
+       
         if (user.refreshToken !== refreshToken) {
-
-            await userModel.findByIdAndUpdate(user._id, { refreshToken: null })
-            res.clearCookie("refreshToken", {
-                httpOnly: true,
-                secure: true,
-                sameSite: "none",
-                path: "/"
-            })
-
             return res.status(401).json({
-                message: "Token reuse/mismatch detected. Please log in again."
+                message: "Invalid refresh token. Please log in again."
             })
         }
 
-        let newRefreshToken = generateRefreshToken(user._id)
+  
         let newAccessToken = generateAccessToken(user._id)
 
-        await userModel.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken })
-
-        res.cookie("refreshToken", newRefreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            path: "/",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
-
         res.status(200).json({
-            message: "Token rotated successfully",
+            message: "Token refreshed successfully",
             data: {
                 user: {
                     id: user._id,
@@ -159,7 +140,7 @@ export const rotateTokensController = async (req, res) => {
 
     } catch (error) {
         return res.status(401).json({
-            message: "Invalid or expired token , Please login again",
+            message: "Invalid or expired token, Please login again",
             error: error.message
         })
     }
