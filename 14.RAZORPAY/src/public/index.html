@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.20.0/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <h1>Razorpay payment gateway</h1>
+    <button id="payBtn">Pay now</button>
+
+    <script>
+        async function paynow() {
+            let response = await axios.post("http://localhost:3000/api/payments/6ace2354eda4ce74774c56c0/order")
+            let { data } = response
+
+            const rzp = new window.Razorpay({
+                key : data.keyId,
+                order_id: data.orderId,
+                amount: data.amount,
+                currency: data.currency,
+                name: "Kapda Co.",
+                description: "Canvas Tote Bag",
+
+                // Step 9: Razorpay calls this with the three values
+                handler: async function (response) {
+                   
+                    await axios.post("http://localhost:3000/api/payments/verify", {
+                        orderId : response.razorpay_order_id,
+                        paymentId : response.razorpay_payment_id,
+                        signature : response.razorpay_signature
+
+                    })
+
+                    console.log("Razorpay response : ",response)
+                },
+            });
+
+            // rzp.on("payment.failed", function (res) {
+            //     showPaymentFailed(res.error.description);
+            // });
+
+            rzp.open();
+
+      
+        }
+              document.getElementById("payBtn").addEventListener("click", paynow)
+    </script>
+</body>
+
+</html>
