@@ -19,7 +19,7 @@ export const createProductController = async (req, res) => {
         }
         const fileData = []
 
-        for (let i = 0; i < req.files.length; i++) {
+        for (let i = 0; i < req.files.length; i++) { // yha img create krra hai ye 
             const response = await uploadFile({
                 buffer: req.files[i].buffer,
                 fileName: req.files[i].originalname
@@ -32,7 +32,7 @@ export const createProductController = async (req, res) => {
         }
 
 
-        let product = await productModel.create({
+        let product = await productModel.create({ // then yha mongo m save krra hai
             title,
             description,
             price,
