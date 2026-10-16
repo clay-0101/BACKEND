@@ -1,0 +1,27 @@
+{
+  "name": "server",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup-env.js",
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.3",
+    "express": "^5.3.0",
+    "express-validator": "^7.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.1",
+    "morgan": "^1.10.1",
+    "socket.io": "^4.8.4"
+  },
+  "description": "This backend follows routes → controller → DAO → model and uses JavaScript ESM.\r See the [project README](../README.md) for configuration, all five endpoint\r examples, frontend proxy wiring, cookie behavior, and deployment requirements.",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
