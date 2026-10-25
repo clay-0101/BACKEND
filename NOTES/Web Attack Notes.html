@@ -1,0 +1,2609 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Web Attack Notes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:ital,wght@0,300;0,600;0,700;0,900;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: sticky ink sidebar + paper main column (Sheryians notes design system). Single light theme by design. */
+:root {
+  --ink:       #0E0F14;
+  --paper:     #F5F2EB;
+  --paper2:    #EDE9DF;
+  --paper3:    #E4DFD3;
+  --rule:      #D4CEBC;
+  --muted:     #6B6455;
+  --accent:    #C84B1F;
+  --accent2:   #1A6B4A;
+  --accent3:   #1B4587;
+  --gold:      #B8860B;
+  --code-bg:   #1A1C24;
+  --code-head: #13141A;
+  --code-text: #E2DCCC;
+  --flag-c:    #5BA4CF;
+  --val-c:     #F4A261;
+  --white:     #FFFFFF;
+  --p-text:    #2A2720;
+
+  --note-bg:     #FEF9EC;
+  --note-border: #EDD97A;
+  --note-text:   #5C4A00;
+  --note-strong: #3D3000;
+  --warn-bg:     #FEF2F2;
+  --warn-border: #FCA5A5;
+  --warn-text:   #7F1D1D;
+
+  --bad-tint:  #F8E6DE;
+  --good-tint: #E2EFE8;
+  --info-tint: #E3E9F3;
+
+  --tk-cmd:     #87CEEB;
+  --tk-kw:      #C678DD;
+  --tk-str:     #98C379;
+  --tk-num:     #F4A261;
+  --tk-key:     #5BA4CF;
+  --tk-fn:      #87CEEB;
+  --tk-comment: rgba(255, 255, 255, 0.34);
+
+  --f-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --f-body:    'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono:    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 40;
+  background: var(--ink);
+}
+
+/* ── Keyframes ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes floatPulse { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes dataFlow { from { stroke-dashoffset: 200; } to { stroke-dashoffset: 0; } }
+@keyframes badPulse { 0%, 100% { stroke-width: 1.5; } 50% { stroke-width: 3; } }
+@keyframes stripFlow { from { background-position: 0 0; } to { background-position: 40px 0; } }
+
+.animate-fade-up { animation: fadeUp 0.4s ease both; }
+
+/* ── Layout ── */
+.layout-container { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background-color: var(--ink);
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  height: calc(100vh - env(safe-area-inset-top, 0px));
+  overflow-y: auto;
+  padding-block: 32px 40px;
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 260px);
+  padding-block: 56px 80px;
+  padding-left: max(56px, env(safe-area-inset-left, 0px));
+  padding-right: max(56px, env(safe-area-inset-right, 0px));
+}
+.main-inner { max-width: 920px; }
+
+/* ── Sidebar ── */
+.nav-brand { padding: 0 24px; margin-bottom: 24px; }
+.nav-brand .logo { font-family: var(--f-display); font-size: 18px; font-weight: 700; color: var(--white); }
+.nav-brand .logo .accent-dot { color: var(--accent); }
+.nav-brand .sub { font-family: var(--f-mono); font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; margin-top: 2px; }
+
+.nav-group-label {
+  font-family: var(--f-mono);
+  font-size: 9px;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0 24px;
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  font-family: var(--f-body);
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.5);
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+.nav-link:hover { color: var(--white); background-color: rgba(255,255,255,0.04); }
+.nav-link.active { color: var(--white); border-left-color: var(--accent); background-color: rgba(200,75,31,0.08); }
+.nav-link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.nav-num {
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  background-color: rgba(255,255,255,0.08);
+  font-family: var(--f-mono);
+  font-size: 9px;
+  border-radius: 4px;
+  color: inherit;
+}
+.nav-link:hover .nav-num, .nav-link.active .nav-num { background-color: var(--accent); color: var(--white); }
+
+/* ── Hero ── */
+.hero { margin-bottom: 64px; padding-bottom: 40px; border-bottom: 1px solid var(--rule); }
+.hero-eyebrow { font-family: var(--f-mono); font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 14px; }
+.hero h1 {
+  font-family: var(--f-display);
+  font-size: clamp(36px, 5vw, 58px);
+  font-weight: 900;
+  color: var(--ink);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero-desc { font-family: var(--f-body); font-size: 16px; color: var(--muted); max-width: 560px; line-height: 1.65; margin: 0 0 20px; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.hero-tag { font-family: var(--f-mono); font-size: 11px; color: var(--muted); border: 1px solid var(--rule); border-radius: 9999px; padding: 2px 12px; }
+
+.zones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 32px; }
+.zone { border: 1px solid var(--rule); border-radius: 10px; padding: 16px 18px; background: var(--paper2); position: relative; overflow: hidden; }
+.zone::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background-image: repeating-linear-gradient(90deg, var(--accent) 0 12px, transparent 12px 20px);
+  background-size: 40px 3px;
+  animation: stripFlow 1.2s linear infinite;
+}
+.zone-where { font-family: var(--f-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 4px; }
+.zone-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 12px; }
+.zone-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.zone-chip {
+  font-family: var(--f-mono); font-size: 11px; color: var(--ink);
+  border: 1px solid var(--rule); background: var(--paper); border-radius: 6px; padding: 3px 9px; text-decoration: none;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.zone-chip:hover, .zone-chip:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+
+/* ── Sections ── */
+.section-block { margin-bottom: 72px; scroll-margin-top: 24px; }
+.section-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 28px; }
+.section-header-text { padding-top: 4px; min-width: 0; }
+.section-num-big { font-family: var(--f-display); font-size: 48px; font-weight: 900; color: var(--rule); user-select: none; line-height: 1; }
+.section-title { font-family: var(--f-display); font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1.2; text-wrap: balance; }
+.section-subtitle { font-family: var(--f-body); font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+h3 { font-family: var(--f-display); font-size: 18px; font-weight: 600; color: var(--ink); margin-top: 28px; margin-bottom: 12px; text-wrap: balance; }
+h4 { font-family: var(--f-mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; margin: 20px 0 8px; }
+p { font-family: var(--f-body); font-size: 14.5px; color: var(--p-text); line-height: 1.7; margin: 0 0 12px; max-width: 70ch; }
+ul.plain { margin: 0 0 12px; padding-left: 20px; max-width: 70ch; }
+ul.plain li { font-size: 14.5px; color: var(--p-text); margin-bottom: 4px; }
+
+code.inline-code, p code, li code, td code, .concept-box-text code, .note-box-text code, .warning-box-text code, .dg-text code, .flow-desc code {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--accent);
+  background-color: var(--paper3);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1px 4px;
+  word-break: break-word;
+}
+
+.step-row { display: flex; align-items: center; gap: 10px; margin: 26px 0 6px; flex-wrap: wrap; }
+.step-row .step-title { font-family: var(--f-body); font-weight: 600; font-size: 15px; color: var(--ink); }
+
+/* ── Boxes ── */
+.concept-box { background-color: var(--paper2); border-left: 3px solid var(--accent3); border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 16px 0; }
+.concept-box-label { font-family: var(--f-mono); font-size: 9px; color: var(--accent3); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
+.concept-box-text { font-family: var(--f-body); font-size: 14px; color: var(--ink); line-height: 1.65; margin: 0 0 8px; max-width: none; }
+.concept-box-text:last-child { margin-bottom: 0; }
+
+.note-box, .warning-box { border-radius: 8px; padding: 12px 16px; margin: 16px 0; display: flex; gap: 12px; align-items: flex-start; }
+.note-box { background-color: var(--note-bg); border: 1px solid var(--note-border); }
+.warning-box { background-color: var(--warn-bg); border: 1px solid var(--warn-border); }
+.note-box-icon, .warning-box-icon { font-size: 18px; line-height: 1; margin-top: 2px; }
+.note-box-text { font-family: var(--f-body); font-size: 13px; color: var(--note-text); margin: 0; max-width: none; }
+.note-box-text strong { color: var(--note-strong); }
+.warning-box-text { font-family: var(--f-body); font-size: 13px; color: var(--warn-text); margin: 0; max-width: none; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--white);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 10px;
+  border-radius: 4px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.badge-accent { background-color: var(--accent); }
+.badge-green  { background-color: var(--accent2); }
+.badge-blue   { background-color: var(--accent3); }
+.badge-gold   { background-color: var(--gold); }
+
+/* ── Code ── */
+.code-block { border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); margin: 16px 0; background: var(--code-bg); }
+.code-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 16px; background-color: var(--code-head); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.code-label { font-family: var(--f-mono); font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.08em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.code-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.code-status { font-family: var(--f-mono); font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 1px 7px; border-radius: 3px; color: var(--white); }
+.code-status.bad { background: var(--accent); }
+.code-status.good { background: var(--accent2); }
+.code-copy-btn { background: none; border: none; font-family: var(--f-mono); font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; transition: color 150ms ease; padding: 2px 0; }
+.code-copy-btn:hover, .code-copy-btn:focus-visible { color: rgba(255,255,255,0.75); outline: none; }
+.code-pre { background-color: var(--code-bg); color: var(--code-text); font-family: var(--f-mono); font-size: 12.5px; line-height: 1.75; padding: 16px 20px; overflow-x: auto; margin: 0; tab-size: 2; }
+
+.token-command { color: var(--tk-cmd); font-weight: bold; }
+.token-flag    { color: var(--flag-c); }
+.token-val     { color: var(--tk-num); }
+.token-string  { color: var(--tk-str); }
+.token-comment { color: var(--tk-comment); font-style: italic; }
+.token-kw      { color: var(--tk-kw); }
+.token-key     { color: var(--tk-key); }
+.token-fn      { color: var(--tk-fn); }
+
+/* ── Tables ── */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.flag-table, .compare-table { width: 100%; border-collapse: collapse; font-family: var(--f-body); font-size: 14px; }
+.flag-table th { font-family: var(--f-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; background-color: var(--paper3); text-align: left; padding: 8px 12px; border: 1px solid var(--rule); font-weight: 500; }
+.flag-table td { padding: 8px 12px; border: 1px solid var(--rule); vertical-align: top; font-size: 13.5px; color: var(--p-text); }
+.flag-table tbody tr, .compare-table tbody tr { transition: background-color 100ms ease; }
+.flag-table tbody tr:hover, .compare-table tbody tr:hover { background-color: var(--paper2); }
+.flag-name { font-family: var(--f-mono); font-size: 12px; font-weight: 600; color: var(--accent3); white-space: nowrap; }
+.flag-val { font-family: var(--f-mono); font-size: 11px; color: var(--accent); white-space: nowrap; }
+
+.compare-table { border-radius: 8px; overflow: hidden; }
+.compare-table th { background-color: var(--ink); color: var(--white); font-size: 13px; font-weight: 600; text-align: left; padding: 12px 16px; border: 1px solid var(--ink); }
+.compare-table td { font-size: 13px; padding: 12px 16px; border: 1px solid var(--rule); vertical-align: top; }
+.compare-table .cell-title { font-weight: 600; color: var(--ink); }
+.compare-table .cell-muted { color: var(--muted); }
+.compare-table .cell-highlight { color: var(--accent2); font-weight: 500; }
+
+/* ── Flow diagram ── */
+.flow-diagram { display: flex; flex-direction: column; margin: 16px 0; }
+.flow-step { display: flex; gap: 16px; }
+.flow-connector { display: flex; flex-direction: column; align-items: center; }
+.flow-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.flow-dot-accent { background-color: var(--accent); }
+.flow-dot-green { background-color: var(--accent2); }
+.flow-line { width: 2px; background-color: var(--rule); flex: 1; margin: 4px 0; }
+.flow-content { padding-bottom: 16px; min-width: 0; }
+.flow-title { font-family: var(--f-body); font-size: 14px; font-weight: 600; color: var(--ink); }
+.flow-desc { font-family: var(--f-body); font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+.scale-diagram { background-color: var(--paper2); border: 1px solid var(--rule); border-radius: 10px; padding: 16px 20px; margin: 16px 0; font-family: var(--f-mono); font-size: 12px; line-height: 2; color: var(--muted); overflow-x: auto; }
+.scale-diagram .highlight { color: var(--ink); font-weight: bold; }
+.scale-diagram .green { color: var(--accent2); }
+.scale-diagram .red { color: var(--accent); }
+
+.divider { border: none; border-top: 1px solid var(--rule); margin: 40px 0; }
+
+/* ── Attack diagram (step-through) ── */
+.attack-diagram { border: 1px solid var(--rule); border-radius: 12px; background: var(--paper2); margin: 20px 0 24px; overflow: hidden; }
+.dg-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--rule); font-family: var(--f-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.dg-head .dg-name { color: var(--ink); font-weight: 600; }
+.dg-live { display: inline-flex; align-items: center; gap: 6px; }
+.dg-live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: floatPulse 2.5s ease-in-out infinite; }
+.dg-stage {
+  overflow-x: auto;
+  background-color: var(--paper);
+  background-image: radial-gradient(var(--rule) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+.dg-stage svg { display: block; width: 100%; min-width: 620px; height: auto; }
+.dg-legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 16px; border-top: 1px solid var(--rule); background: var(--paper); font-family: var(--f-mono); font-size: 10px; color: var(--muted); }
+.dg-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dg-legend i { width: 12px; height: 9px; border-radius: 2px; display: inline-block; border: 1px solid var(--rule); }
+.dg-legend .lg-L { background: var(--accent2); border-color: var(--accent2); }
+.dg-legend .lg-A { background: var(--accent); border-color: var(--accent); }
+.dg-legend .lg-S { background: var(--gold); border-color: var(--gold); }
+.dg-legend .lg-free { background: var(--paper3); }
+
+.dg-caption { padding: 16px 20px; border-top: 1px solid var(--rule); min-height: 118px; }
+.dg-cap-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.dg-step-title { font-family: var(--f-body); font-weight: 600; font-size: 15px; color: var(--ink); }
+.dg-text { font-size: 14px; margin: 0; max-width: 72ch; }
+
+.dg-controls { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--rule); flex-wrap: wrap; background: var(--paper2); }
+.dg-btn {
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.04em;
+  color: var(--ink); background: var(--paper); border: 1px solid var(--rule);
+  border-radius: 6px; padding: 6px 14px; cursor: pointer;
+  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+}
+.dg-btn:hover:not(:disabled) { border-color: var(--ink); }
+.dg-btn:focus-visible { outline: 2px solid var(--accent3); outline-offset: 2px; }
+.dg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.dg-btn-primary { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.dg-btn-primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+.dg-dots { display: flex; gap: 6px; flex: 1; min-width: 80px; }
+.dg-dot-btn { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--muted); background: transparent; padding: 0; cursor: pointer; }
+.dg-dot-btn.on { background: var(--accent); border-color: var(--accent); }
+.dg-dot-btn.done { background: var(--muted); }
+.dg-dot-btn:focus-visible { outline: 2px solid var(--accent3); outline-offset: 2px; }
+.dg-counter { font-family: var(--f-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* SVG parts */
+.dg-box { fill: var(--paper); stroke: var(--rule); stroke-width: 1.5; transition: fill 0.3s ease, stroke 0.3s ease; }
+.dg-node { transition: opacity 0.35s ease; }
+.dg-node.is-active .dg-box { stroke: var(--accent3); fill: var(--info-tint); }
+.dg-node.is-bad .dg-box { stroke: var(--accent); fill: var(--bad-tint); animation: badPulse 1.6s ease-in-out infinite; }
+.dg-node.is-safe .dg-box { stroke: var(--accent2); fill: var(--good-tint); }
+.dg-node.is-dim { opacity: 0.35; }
+.dg-node.is-hidden { opacity: 0; }
+.dg-label { font-family: var(--f-body); font-size: 12.5px; font-weight: 600; fill: var(--ink); }
+.dg-sub { font-family: var(--f-mono); font-size: 9.5px; fill: var(--muted); }
+.ic { fill: var(--paper2); stroke: var(--ink); stroke-width: 1.4; }
+.ic-line { fill: none; stroke: var(--ink); stroke-width: 1.4; stroke-linecap: round; }
+.ic-dot { fill: var(--accent2); }
+.ic-bad { fill: var(--accent); stroke: var(--ink); stroke-width: 1.4; }
+.ic-good { fill: none; stroke: var(--accent2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.dg-line { fill: none; stroke-width: 1.8; stroke-dasharray: 5 5; animation: dataFlow 1.5s linear infinite; }
+.dg-line.tone-bad, .dg-pill.tone-bad { stroke: var(--accent); }
+.dg-line.tone-good, .dg-pill.tone-good { stroke: var(--accent2); }
+.dg-line.tone-info, .dg-pill.tone-info { stroke: var(--accent3); }
+.dg-arrow.tone-bad, .dg-dot.tone-bad { fill: var(--accent); }
+.dg-arrow.tone-good, .dg-dot.tone-good { fill: var(--accent2); }
+.dg-arrow.tone-info, .dg-dot.tone-info { fill: var(--accent3); }
+.dg-pill { fill: var(--paper); stroke-width: 1.2; }
+.dg-pill-text { font-family: var(--f-mono); font-size: 10px; font-weight: 500; fill: var(--ink); }
+.dg-slot { stroke-width: 1; transition: fill 0.3s ease, stroke 0.3s ease; }
+.dg-slot.slot-free { fill: var(--paper3); stroke: var(--rule); }
+.dg-slot.slot-L { fill: var(--accent2); stroke: var(--accent2); }
+.dg-slot.slot-A { fill: var(--accent); stroke: var(--accent); }
+.dg-slot.slot-S { fill: var(--gold); stroke: var(--gold); }
+.dg-slot-label { font-family: var(--f-mono); font-size: 9px; fill: var(--muted); }
+
+/* ── Playground ── */
+.playground { border: 1px solid var(--rule); border-radius: 10px; background: var(--paper2); padding: 16px 18px; margin: 20px 0; }
+.pg-head { font-family: var(--f-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent3); margin-bottom: 12px; }
+.pg-label { display: block; font-family: var(--f-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+.pg-input { width: 100%; font-family: var(--f-mono); font-size: 13px; color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 9px 12px; margin-bottom: 14px; }
+.pg-input:focus { outline: 2px solid var(--accent3); outline-offset: 1px; }
+.pg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.pg-out { font-family: var(--f-mono); font-size: 12.5px; background: var(--code-bg); color: var(--tk-str); border-radius: 6px; padding: 10px 12px; margin: 0; white-space: pre-wrap; word-break: break-all; min-height: 44px; }
+.pg-screen { font-family: var(--f-body); font-size: 14px; background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 12px; min-height: 44px; word-break: break-word; color: var(--ink); }
+
+/* ── Quiz ── */
+.quiz-box { background-color: var(--ink); border-radius: 12px; padding: 24px; margin: 32px 0; border: 1px solid rgba(255,255,255,0.08); }
+.quiz-label { font-family: var(--f-mono); font-size: 9px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
+.quiz-question { font-family: var(--f-body); font-size: 15px; color: var(--white); font-weight: 500; line-height: 1.6; margin-bottom: 20px; max-width: none; }
+.quiz-question code { color: var(--val-c); background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1); }
+.quiz-options { display: flex; flex-direction: column; gap: 12px; }
+.quiz-option {
+  text-align: left; font-family: var(--f-body); font-size: 13.5px;
+  color: rgba(255,255,255,0.7); background: transparent;
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+  padding: 12px 16px; cursor: pointer; transition: all 200ms ease;
+}
+.quiz-option:hover:not(:disabled), .quiz-option:focus-visible { border-color: var(--accent); color: var(--white); background-color: rgba(200,75,31,0.08); outline: none; }
+.quiz-option:disabled { cursor: not-allowed; }
+.quiz-option.correct { border-color: var(--accent2) !important; background-color: rgba(26,107,74,0.15) !important; color: var(--white) !important; opacity: 1 !important; }
+.quiz-option.incorrect { border-color: var(--accent) !important; background-color: rgba(200,75,31,0.15) !important; color: var(--white) !important; opacity: 1 !important; }
+.quiz-feedback { margin-top: 16px; font-family: var(--f-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+.quiz-feedback.correct { color: #4FB386; }
+.quiz-feedback.incorrect { color: #E8774F; }
+.quiz-feedback.hidden { display: none; }
+
+/* ── Footer ── */
+.site-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--f-mono); font-size: 11px; color: var(--muted); border-top: 2px solid var(--rule); padding-top: 16px; margin-top: 64px; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .layout-container { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    z-index: 30;
+    padding-block: 12px 0;
+    padding-left: 0;
+    overflow: visible;
+  }
+  .nav-brand {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .nav-list {
+    display: flex; overflow-x: auto; gap: 2px;
+    padding-left: max(8px, env(safe-area-inset-left, 0px));
+    padding-right: max(8px, env(safe-area-inset-right, 0px));
+    scrollbar-width: none;
+  }
+  .nav-list::-webkit-scrollbar { display: none; }
+  .nav-group-label { display: none; }
+  .nav-link { white-space: nowrap; border-left: none; border-bottom: 2px solid transparent; padding: 10px 12px; }
+  .nav-link.active { border-bottom-color: var(--accent); }
+  .main-content {
+    max-width: 100%;
+    padding-block: 32px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .section-block { scroll-margin-top: 110px; }
+  .zones { grid-template-columns: minmax(0, 1fr); }
+  .pg-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .section-num-big { font-size: 36px; }
+  .section-title { font-size: 22px; }
+  .code-pre { padding: 14px 14px; font-size: 12px; }
+  .quiz-box { padding: 20px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="layout-container">
+
+  <nav class="sidebar" aria-label="Sections">
+    <div class="nav-brand">
+      <div class="logo">Web<span class="accent-dot">.</span>Attacks</div>
+      <div class="sub">Sheryians Coding School</div>
+    </div>
+    <div class="nav-list">
+      <div class="nav-group-label">Start here</div>
+      <a href="#setup" class="nav-link active"><span class="nav-num">0</span>The server we protect</a>
+
+      <div class="nav-group-label">In the browser</div>
+      <a href="#xss" class="nav-link"><span class="nav-num">1</span>Cross-Site Scripting</a>
+      <a href="#csrf" class="nav-link"><span class="nav-num">2</span>CSRF</a>
+
+      <div class="nav-group-label">At your routes</div>
+      <a href="#nosql" class="nav-link"><span class="nav-num">3</span>NoSQL Injection</a>
+      <a href="#session" class="nav-link"><span class="nav-num">4</span>Session Hijacking</a>
+      <a href="#brute" class="nav-link"><span class="nav-num">5</span>Brute Force</a>
+
+      <div class="nav-group-label">At the connection</div>
+      <a href="#dos" class="nav-link"><span class="nav-num">6</span>DoS &amp; DDoS</a>
+      <a href="#slow" class="nav-link"><span class="nav-num">7</span>Slow Request Attack</a>
+      <a href="#slowloris" class="nav-link"><span class="nav-num">8</span>Slowloris</a>
+
+      <div class="nav-group-label">Wrap up</div>
+      <a href="#checklist" class="nav-link"><span class="nav-num">9</span>Defense Checklist</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="main-inner">
+
+    <!-- ═══════════ HERO ═══════════ -->
+    <header class="hero animate-fade-up">
+      <div class="hero-eyebrow">Backend Security · Cohort Notes</div>
+      <h1>Know the attack. <em>Block it</em> on your server.</h1>
+      <p class="hero-desc">Eight attacks that hit real Express + MongoDB servers. For each one you get what it is in plain words, an animated flow you can step through, the bug in code, and the fix.</p>
+      <div class="hero-tags">
+        <span class="hero-tag">Express 5</span>
+        <span class="hero-tag">MongoDB + Mongoose</span>
+        <span class="hero-tag">express-validator</span>
+        <span class="hero-tag">helmet</span>
+        <span class="hero-tag">express-rate-limit</span>
+        <span class="hero-tag">csrf-csrf</span>
+      </div>
+
+      <div class="zones">
+        <div class="zone">
+          <div class="zone-where">In the user's browser</div>
+          <p class="zone-desc">The attack runs in the victim's browser and uses their login.</p>
+          <div class="zone-chips">
+            <a class="zone-chip" href="#xss">XSS</a>
+            <a class="zone-chip" href="#csrf">CSRF</a>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="zone-where">At your routes</div>
+          <p class="zone-desc">Bad input or stolen credentials reach your controllers and database.</p>
+          <div class="zone-chips">
+            <a class="zone-chip" href="#nosql">NoSQL injection</a>
+            <a class="zone-chip" href="#session">Session hijacking</a>
+            <a class="zone-chip" href="#brute">Brute force</a>
+          </div>
+        </div>
+        <div class="zone">
+          <div class="zone-where">At the connection</div>
+          <p class="zone-desc">The server is kept too busy to answer real users.</p>
+          <div class="zone-chips">
+            <a class="zone-chip" href="#dos">DoS / DDoS</a>
+            <a class="zone-chip" href="#slow">Slow request</a>
+            <a class="zone-chip" href="#slowloris">Slowloris</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════ 00 SETUP ═══════════ -->
+    <section class="section-block animate-fade-up" id="setup">
+      <div class="section-header">
+        <div class="section-num-big">00</div>
+        <div class="section-header-text">
+          <div class="section-title">The server we protect</div>
+          <div class="section-subtitle">One Express + MongoDB API used in every example below</div>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">The one rule</div>
+        <p class="concept-box-text">Everything inside <code>req.body</code>, <code>req.query</code>, <code>req.params</code>, <code>req.cookies</code> and <code>req.headers</code> comes from the client. The client can be your React app, Postman, or a script someone wrote to attack you. <strong>Treat every value as untrusted until you have checked it.</strong></p>
+      </div>
+
+      <p>All examples use one small API: users can sign up, log in, write posts and comment. The stack is the one you already use: Express, Mongoose, JWT access token in memory, refresh token in a cookie, bcrypt for passwords. Validation is done with <code>express-validator</code>.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">Terminal</span>
+          <div class="code-actions"><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="sh">npm install express mongoose express-validator helmet express-rate-limit cookie-parser csrf-csrf jsonwebtoken bcryptjs</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">Project structure</span>
+          <div class="code-actions"><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="plain">src/
+├── app.js                 # express app + global middlewares
+├── server.js              # app.listen + connection timeouts
+├── middlewares/
+│   ├── auth.js            # verifies the access token
+│   └── validate.js        # sends express-validator errors back
+├── models/
+│   ├── user.model.js
+│   ├── comment.model.js
+│   └── session.model.js   # one document per refresh token
+├── utils/
+│   └── tokens.js          # issueTokens(), sha256()
+└── routes/
+    ├── auth.routes.js     # /api/auth/*
+    ├── post.routes.js     # /api/posts/*
+    └── user.routes.js     # /api/users/*</pre>
+      </div>
+
+      <h3>The validate middleware</h3>
+      <p>express-validator rules only <em>collect</em> errors. This tiny middleware reads them and stops the request with 400 before your controller runs. Every route in these notes uses it.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/middlewares/validate.js</span>
+          <div class="code-actions"><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const { validationResult } = require('express-validator');
+
+function validate(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+}
+
+module.exports = validate;</pre>
+      </div>
+
+      <h3>Routes used in these notes</h3>
+      <div class="table-wrap">
+        <table class="flag-table">
+          <thead><tr><th>Route</th><th>Method</th><th>Attacked in</th></tr></thead>
+          <tbody>
+            <tr><td><span class="flag-name">/api/posts/:postId/comments</span></td><td><span class="flag-val">POST</span></td><td>01 XSS</td></tr>
+            <tr><td><span class="flag-name">/api/users/me/email</span></td><td><span class="flag-val">POST</span></td><td>02 CSRF</td></tr>
+            <tr><td><span class="flag-name">/api/auth/reset-password</span></td><td><span class="flag-val">POST</span></td><td>03 NoSQL injection</td></tr>
+            <tr><td><span class="flag-name">/api/auth/refresh</span></td><td><span class="flag-val">POST</span></td><td>04 Session hijacking</td></tr>
+            <tr><td><span class="flag-name">/api/auth/login</span></td><td><span class="flag-val">POST</span></td><td>05 Brute force</td></tr>
+            <tr><td><span class="flag-name">/api/posts</span></td><td><span class="flag-val">GET</span></td><td>06 DoS</td></tr>
+            <tr><td><span class="flag-name">any route</span></td><td><span class="flag-val">ANY</span></td><td>07 Slow request, 08 Slowloris</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>The path of one request, layer by layer</h3>
+      <p>Each layer below stops a different attack. By the end of these notes you will have added all of them.</p>
+      <div class="flow-diagram">
+        <div class="flow-step"><div class="flow-connector"><div class="flow-dot flow-dot-accent"></div><div class="flow-line"></div></div>
+          <div class="flow-content"><div class="flow-title">CDN / WAF</div><div class="flow-desc">Drops floods from thousands of IPs before they reach you. Stops DDoS.</div></div></div>
+        <div class="flow-step"><div class="flow-connector"><div class="flow-dot flow-dot-accent"></div><div class="flow-line"></div></div>
+          <div class="flow-content"><div class="flow-title">Load balancer / NGINX + Node timeouts</div><div class="flow-desc">Closes connections that send data too slowly. Stops slow request and Slowloris.</div></div></div>
+        <div class="flow-step"><div class="flow-connector"><div class="flow-dot flow-dot-accent"></div><div class="flow-line"></div></div>
+          <div class="flow-content"><div class="flow-title"><code>helmet()</code></div><div class="flow-desc">Adds security headers like Content-Security-Policy. Helps against XSS.</div></div></div>
+        <div class="flow-step"><div class="flow-connector"><div class="flow-dot flow-dot-accent"></div><div class="flow-line"></div></div>
+          <div class="flow-content"><div class="flow-title"><code>express-rate-limit</code></div><div class="flow-desc">Caps requests per IP. Stops brute force and simple DoS.</div></div></div>
+        <div class="flow-step"><div class="flow-connector"><div class="flow-dot flow-dot-accent"></div><div class="flow-line"></div></div>
+          <div class="flow-content"><div class="flow-title"><code>express.json({ limit })</code> + cookie checks</div><div class="flow-desc">Refuses huge bodies. sameSite cookies and CSRF tokens stop CSRF.</div></div></div>
+        <div class="flow-step"><div class="flow-connector"><div class="flow-dot flow-dot-accent"></div><div class="flow-line"></div></div>
+          <div class="flow-content"><div class="flow-title"><code>express-validator</code></div><div class="flow-desc">Checks type, length and format of every field. Stops NoSQL injection and stored XSS.</div></div></div>
+        <div class="flow-step"><div class="flow-connector"><div class="flow-dot flow-dot-green"></div></div>
+          <div class="flow-content"><div class="flow-title">Controller + Mongoose</div><div class="flow-desc">Runs only on clean, validated data.</div></div></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 01 XSS ═══════════ -->
+    <section class="section-block animate-fade-up" id="xss">
+      <div class="section-header">
+        <div class="section-num-big">01</div>
+        <div class="section-header-text">
+          <div class="section-title">Cross-Site Scripting (XSS)</div>
+          <div class="section-subtitle">User text is shown on the page and the browser runs it as code</div>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">What it is</div>
+        <p class="concept-box-text">Your server stores or returns text that a user typed. If that text contains HTML like a <code>&lt;script&gt;</code> tag, and the frontend puts it on the page as HTML, <strong>the browser runs it as JavaScript</strong>.</p>
+        <p class="concept-box-text">That script runs inside <em>your</em> site, with the logged-in user's access. It can read the page, call your API as that user, and send data out.</p>
+      </div>
+
+      <h3>Three kinds of XSS</h3>
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead><tr><th>Type</th><th>Where the script lives</th><th>Common spot</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-title">Stored</td><td class="cell-muted">Saved in your database, shown to every visitor</td><td>Comments, bios, post titles</td></tr>
+            <tr><td class="cell-title">Reflected</td><td class="cell-muted">Sent in the request, printed back in the response</td><td>A page that prints <code>?search=</code> back</td></tr>
+            <tr><td class="cell-title">DOM-based</td><td class="cell-muted">Frontend JS puts URL or input into <code>innerHTML</code></td><td>Reading <code>location.hash</code> into the page</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>How stored XSS flows</h3>
+      <div class="attack-diagram" data-diagram="xss"></div>
+
+      <h3>Where the bug is</h3>
+      <p>Two mistakes work together. The server saves the text as-is, and the frontend renders it as HTML.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/post.routes.js</span>
+          <div class="code-actions"><span class="code-status bad">vulnerable</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">router.post('/:postId/comments', auth, async (req, res) => {
+  const comment = await Comment.create({
+    post: req.params.postId,
+    author: req.user.id,
+    text: req.body.text,            // saved exactly as the client sent it
+  });
+  res.status(201).json(comment);
+});</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">CommentItem.jsx (React)</span>
+          <div class="code-actions"><span class="code-status bad">vulnerable</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">function CommentItem({ comment }) {
+  // turns the text into real HTML, so a script tag inside becomes code
+  return &lt;p dangerouslySetInnerHTML={{ __html: comment.text }} /&gt;;
+}</pre>
+      </div>
+
+      <h3>How to stop it</h3>
+
+      <div class="step-row"><span class="badge badge-accent">Step 1</span><span class="step-title">Validate and escape the input</span></div>
+      <p><code>.escape()</code> replaces <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, <code>'</code> and <code>"</code> with HTML entities. After that, a browser shows the characters as plain text instead of running them.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/post.routes.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const { body, param, matchedData } = require('express-validator');
+const validate = require('../middlewares/validate');
+
+const commentRules = [
+  param('postId').isMongoId().withMessage('Invalid post id'),
+  body('text')
+    .isString().withMessage('Comment must be text')
+    .trim()
+    .isLength({ min: 1, max: 500 }).withMessage('Comment must be 1 to 500 characters')
+    .escape(),                      // &lt; &gt; &amp; ' " become HTML entities
+];
+
+router.post('/:postId/comments', auth, commentRules, validate, async (req, res) => {
+  const { postId, text } = matchedData(req);   // only fields that passed the rules
+  const comment = await Comment.create({ post: postId, author: req.user.id, text });
+  res.status(201).json(comment);
+});</pre>
+      </div>
+
+      <div class="playground">
+        <div class="pg-head">Try it · what .escape() does to the text</div>
+        <label class="pg-label" for="esc-input">Comment text sent by the client</label>
+        <input class="pg-input" id="esc-input" type="text" spellcheck="false" autocomplete="off" value="&lt;b&gt;Great post!&lt;/b&gt; &amp; &quot;thanks&quot;">
+        <div class="pg-grid">
+          <div>
+            <span class="pg-label">Saved in MongoDB after .escape()</span>
+            <pre class="pg-out" id="esc-saved"></pre>
+          </div>
+          <div>
+            <span class="pg-label">What the user sees on screen</span>
+            <div class="pg-screen" id="esc-screen"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 2</span><span class="step-title">Render user text as text in React</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">CommentItem.jsx (React)</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">function CommentItem({ comment }) {
+  return &lt;p&gt;{comment.text}&lt;/p&gt;;   // React prints it as text, never as HTML
+}</pre>
+      </div>
+
+      <div class="note-box">
+        <div class="note-box-icon">💡</div>
+        <p class="note-box-text"><strong>Escape once, at one place.</strong> React already escapes <code>{comment.text}</code>. If the server also escaped it, users see <code>&amp;lt;</code> on screen. For a React-only frontend you can skip <code>.escape()</code> and just never use <code>dangerouslySetInnerHTML</code> with user text. Keep <code>.escape()</code> when the same data also goes into HTML emails, server-rendered pages or an admin panel that uses <code>innerHTML</code>.</p>
+      </div>
+
+      <div class="step-row"><span class="badge badge-blue">Step 3</span><span class="step-title">Add a Content-Security-Policy with helmet</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/app.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const helmet = require('helmet');
+
+app.use(helmet());   // sets Content-Security-Policy, HSTS, X-Content-Type-Options and more</pre>
+      </div>
+      <p>helmet's default policy only allows scripts from your own domain and blocks inline event handlers. So even if a script tag slips through, the browser refuses to run it. This is your second wall, not your first.</p>
+
+      <div class="warning-box">
+        <div class="warning-box-icon">⚠️</div>
+        <p class="warning-box-text"><strong>The CSP header must be on the response that serves your HTML page.</strong> If Express only sends JSON and your React build is served by NGINX or a CDN, set the CSP there too. Also remember: the refresh token in an <code>httpOnly</code> cookie can't be read by a script, but an injected script can still call your API as the user while the tab is open. Fixing XSS itself matters most.</p>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · XSS</div>
+        <p class="quiz-question">A comment is saved in MongoDB and shown to every visitor of the post. Which type of XSS is this?</p>
+        <div class="quiz-options" id="quiz-xss-1">
+          <button onclick="answerQuiz('quiz-xss-1', this, true)" class="quiz-option">A &nbsp;—&nbsp; Stored XSS</button>
+          <button onclick="answerQuiz('quiz-xss-1', this, false)" class="quiz-option">B &nbsp;—&nbsp; Reflected XSS</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-xss-1-feedback"></div>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · XSS</div>
+        <p class="quiz-question">Your refresh token is in an <code>httpOnly</code> cookie. Can injected JavaScript read it with <code>document.cookie</code>?</p>
+        <div class="quiz-options" id="quiz-xss-2">
+          <button onclick="answerQuiz('quiz-xss-2', this, false)" class="quiz-option">A &nbsp;—&nbsp; Yes, any script on the page can read every cookie</button>
+          <button onclick="answerQuiz('quiz-xss-2', this, true)" class="quiz-option">B &nbsp;—&nbsp; No, httpOnly cookies are hidden from JavaScript</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-xss-2-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 02 CSRF ═══════════ -->
+    <section class="section-block animate-fade-up" id="csrf">
+      <div class="section-header">
+        <div class="section-num-big">02</div>
+        <div class="section-header-text">
+          <div class="section-title">Cross-Site Request Forgery (CSRF)</div>
+          <div class="section-subtitle">Another site makes the victim's browser send a request to your API</div>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">What it is</div>
+        <p class="concept-box-text">A browser attaches your site's cookies to <strong>every request sent to your domain</strong>, even when that request was started by a page on a different website.</p>
+        <p class="concept-box-text">CSRF uses this. A page the attacker controls makes the victim's browser send a request to your API. The cookie goes along automatically, so your server thinks the user did it.</p>
+      </div>
+
+      <div class="note-box">
+        <div class="note-box-icon">💡</div>
+        <p class="note-box-text"><strong>CSRF only works with cookies.</strong> If your access token lives in memory and is sent in the <code>Authorization</code> header, another site cannot add that header, so those routes are safe from CSRF. But many projects keep the JWT in a cookie with <code>res.cookie('token', ...)</code>, and your refresh token is always a cookie. That is where CSRF hits.</p>
+      </div>
+
+      <h3>How CSRF flows</h3>
+      <div class="attack-diagram" data-diagram="csrf"></div>
+
+      <h3>Where the bug is</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">auth controller + middleware + route</span>
+          <div class="code-actions"><span class="code-status bad">vulnerable</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">// login controller
+res.cookie('token', token);                 // no sameSite, no httpOnly, no secure
+
+// src/middlewares/auth.js
+const token = req.cookies.token;            // any request carrying the cookie is trusted
+
+// src/routes/user.routes.js
+router.post('/me/email', auth, async (req, res) => {
+  await User.findByIdAndUpdate(req.user.id, { email: req.body.email });
+  res.json({ message: 'Email updated' });
+});</pre>
+      </div>
+
+      <h3>How to stop it</h3>
+
+      <div class="step-row"><span class="badge badge-accent">Step 1</span><span class="step-title">Set safe cookie options</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">login controller</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">res.cookie('token', token, {
+  httpOnly: true,               // JavaScript can't read it
+  secure: true,                 // only sent over HTTPS
+  sameSite: 'strict',           // not sent on requests started by other sites
+  maxAge: 15 * 60 * 1000,       // 15 minutes
+});</pre>
+      </div>
+      <div class="table-wrap">
+        <table class="flag-table">
+          <thead><tr><th>Option</th><th>Value used</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><span class="flag-name">httpOnly</span></td><td><span class="flag-val">true</span></td><td>Hides the cookie from <code>document.cookie</code>. Protects against XSS stealing it.</td></tr>
+            <tr><td><span class="flag-name">secure</span></td><td><span class="flag-val">true</span></td><td>Cookie is only sent over HTTPS, never plain HTTP.</td></tr>
+            <tr><td><span class="flag-name">sameSite</span></td><td><span class="flag-val">'strict'</span></td><td>Browser never sends the cookie on a request started by another site. This is the main CSRF fix.</td></tr>
+            <tr><td><span class="flag-name">sameSite</span></td><td><span class="flag-val">'lax'</span></td><td>Sent when the user clicks a link to your site (GET), not on cross-site POST, PUT or DELETE.</td></tr>
+            <tr><td><span class="flag-name">sameSite</span></td><td><span class="flag-val">'none'</span></td><td>Always sent, from any site. Needs <code>secure: true</code>. Avoid for auth cookies.</td></tr>
+            <tr><td><span class="flag-name">maxAge</span></td><td><span class="flag-val">900000</span></td><td>Cookie expires after 15 minutes (value is in milliseconds).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note-box">
+        <div class="note-box-icon">💡</div>
+        <p class="note-box-text"><strong>"Site" means the main domain.</strong> <code>app.yourapp.com</code> and <code>api.yourapp.com</code> are the same site, so <code>sameSite: 'strict'</code> still works when your React app and API sit on different subdomains.</p>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 2</span><span class="step-title">Add a CSRF token with csrf-csrf</span></div>
+      <p>For cookie-based auth, add a second check. The server gives the frontend a CSRF token. The frontend sends it back in the <code>x-csrf-token</code> header on every POST, PUT, PATCH and DELETE. Another site can't read that token, so it can't send it.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/app.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const cookieParser = require('cookie-parser');
+const { doubleCsrf } = require('csrf-csrf');
+
+app.use(cookieParser());        // must come before doubleCsrfProtection
+
+const { generateCsrfToken, doubleCsrfProtection } = doubleCsrf({
+  getSecret: () => process.env.CSRF_SECRET,
+  getSessionIdentifier: (req) => req.cookies.token ?? '',   // ties the CSRF token to this login
+  cookieName: 'x-csrf-token',   // use '__Host-x-csrf-token' in production (needs HTTPS)
+  cookieOptions: { sameSite: 'strict', secure: true },
+});
+
+// the frontend calls this once and keeps the token
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: generateCsrfToken(req, res) });
+});
+
+// every route registered after this line needs a valid x-csrf-token header
+app.use(doubleCsrfProtection);
+
+app.use('/api/users', require('./routes/user.routes'));</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">frontend · api.js (axios)</span>
+          <div class="code-actions"><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const api = axios.create({ baseURL: 'https://api.yourapp.com', withCredentials: true });
+
+const { data } = await api.get('/api/csrf-token');
+api.defaults.headers.common['x-csrf-token'] = data.csrfToken;   // sent on every request now</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-blue">Step 3</span><span class="step-title">Validate the body, and never change data on GET</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/user.routes.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const { body } = require('express-validator');
+
+router.post(
+  '/me/email',
+  auth,
+  body('email').isEmail().withMessage('Enter a valid email').normalizeEmail(),
+  validate,
+  updateEmail
+);
+
+// never change data on GET: links and &lt;img&gt; tags can fire GET requests from anywhere
+// router.get('/me/delete', auth, deleteAccount);   wrong</pre>
+      </div>
+
+      <div class="warning-box">
+        <div class="warning-box-icon">⚠️</div>
+        <p class="warning-box-text"><strong>CORS does not stop CSRF.</strong> CORS only decides whether another site can <em>read</em> your response. A form POST from another site is still <em>sent</em>, the cookie still goes along, and your server still runs the update. Use sameSite cookies and CSRF tokens.</p>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · CSRF</div>
+        <p class="quiz-question">Your API's CORS config allows only your frontend's origin. Does that alone stop a CSRF form post from another site?</p>
+        <div class="quiz-options" id="quiz-csrf-1">
+          <button onclick="answerQuiz('quiz-csrf-1', this, false)" class="quiz-option">A &nbsp;—&nbsp; Yes, CORS blocks the request from reaching the server</button>
+          <button onclick="answerQuiz('quiz-csrf-1', this, true)" class="quiz-option">B &nbsp;—&nbsp; No, the request is still sent; CORS only blocks reading the response</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-csrf-1-feedback"></div>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · CSRF</div>
+        <p class="quiz-question">Which cookie option stops the browser from sending the cookie on requests started by other sites?</p>
+        <div class="quiz-options" id="quiz-csrf-2">
+          <button onclick="answerQuiz('quiz-csrf-2', this, true)" class="quiz-option">A &nbsp;—&nbsp; sameSite: 'strict'</button>
+          <button onclick="answerQuiz('quiz-csrf-2', this, false)" class="quiz-option">B &nbsp;—&nbsp; httpOnly: true</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-csrf-2-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 03 NOSQL ═══════════ -->
+    <section class="section-block animate-fade-up" id="nosql">
+      <div class="section-header">
+        <div class="section-num-big">03</div>
+        <div class="section-header-text">
+          <div class="section-title">NoSQL Injection</div>
+          <div class="section-subtitle">An object arrives where your query expected a string</div>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">What it is</div>
+        <p class="concept-box-text"><code>express.json()</code> turns the request body into a JavaScript object. A field you expect to be a string can arrive as <strong>an object</strong> instead.</p>
+        <p class="concept-box-text">If that object contains a MongoDB query operator and you pass it straight into <code>findOne()</code>, MongoDB reads it as a <strong>condition</strong>, not a value. The meaning of your query changes, for example from "this exact token" to "any token".</p>
+      </div>
+
+      <h3>How NoSQL injection flows</h3>
+      <div class="attack-diagram" data-diagram="nosql"></div>
+
+      <h3>Where the bug is</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/auth.routes.js</span>
+          <div class="code-actions"><span class="code-status bad">vulnerable</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">router.post('/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;            // no type check at all
+
+  const user = await User.findOne({
+    resetToken: token,                                // could be an object, not a string
+    resetTokenExpiry: { $gt: Date.now() },
+  });
+  if (!user) return res.status(400).json({ message: 'Invalid or expired link' });
+
+  user.password = await bcrypt.hash(newPassword, 12);
+  user.resetToken = undefined;
+  await user.save();
+  res.json({ message: 'Password updated' });
+});</pre>
+      </div>
+
+      <h3>How to stop it</h3>
+
+      <div class="step-row"><span class="badge badge-accent">Step 1</span><span class="step-title">Check the type with express-validator</span></div>
+      <p>The reset token is created with <code>crypto.randomBytes(32).toString('hex')</code>, so a real one is always a 64-character hex string. Say exactly that.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/auth.routes.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const { body } = require('express-validator');
+
+const resetRules = [
+  body('token')
+    .isString().withMessage('Token must be a string')     // an object fails right here
+    .isLength({ min: 64, max: 64 }).withMessage('Invalid token')
+    .isHexadecimal().withMessage('Invalid token'),
+  body('newPassword')
+    .isString()
+    .isStrongPassword().withMessage('Use 8+ characters with upper, lower, number and symbol'),
+];
+
+router.post('/reset-password', resetRules, validate, resetPassword);</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 2</span><span class="step-title">Use only validated data in the controller</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/controllers/auth.controller.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const mongoose = require('mongoose');
+const { matchedData } = require('express-validator');
+
+async function resetPassword(req, res) {
+  const { token, newPassword } = matchedData(req);    // only fields that passed the rules
+
+  const user = await User.findOne({
+    resetToken: token,
+    resetTokenExpiry: mongoose.trusted({ $gt: Date.now() }),   // our own operator, see step 3
+  });
+  if (!user) return res.status(400).json({ message: 'Invalid or expired link' });
+
+  user.password = await bcrypt.hash(newPassword, 12);
+  user.resetToken = undefined;
+  user.resetTokenExpiry = undefined;
+  await user.save();
+  res.json({ message: 'Password updated' });
+}</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-blue">Step 3</span><span class="step-title">Turn on Mongoose's safety net</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/app.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">// once, before any query runs
+mongoose.set('sanitizeFilter', true);</pre>
+      </div>
+      <p>With <code>sanitizeFilter</code> on, if an operator object still slips into a filter, Mongoose wraps it so MongoDB compares it as a plain value. Your own operators like <code>$gt</code> also get wrapped, so mark them with <code>mongoose.trusted()</code> as in step 2.</p>
+
+      <div class="warning-box">
+        <div class="warning-box-icon">⚠️</div>
+        <p class="warning-box-text"><strong>Never pass the whole <code>req.body</code> into Mongoose.</strong> <code>User.findByIdAndUpdate(id, req.body)</code> lets a user send any field, including <code>role: 'admin'</code>. Pick fields with <code>matchedData(req)</code> instead.</p>
+      </div>
+      <div class="note-box">
+        <div class="note-box-icon">💡</div>
+        <p class="note-box-text"><strong>Using Express 5?</strong> The old <code>express-mongo-sanitize</code> package throws an error there, because <code>req.query</code> became read-only. Express 5's default query parser also no longer builds nested objects from the URL. JSON bodies can still carry objects, which is why the type check in step 1 is your main defense.</p>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · NoSQL injection</div>
+        <p class="quiz-question">Which express-validator rule stops an object from reaching your query where a string was expected?</p>
+        <div class="quiz-options" id="quiz-nosql-1">
+          <button onclick="answerQuiz('quiz-nosql-1', this, true)" class="quiz-option">A &nbsp;—&nbsp; body('token').isString()</button>
+          <button onclick="answerQuiz('quiz-nosql-1', this, false)" class="quiz-option">B &nbsp;—&nbsp; body('token').notEmpty()</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-nosql-1-feedback"></div>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · NoSQL injection</div>
+        <p class="quiz-question">You turned on <code>mongoose.set('sanitizeFilter', true)</code>. Your own query uses <code>{ $gt: Date.now() }</code>. What do you do?</p>
+        <div class="quiz-options" id="quiz-nosql-2">
+          <button onclick="answerQuiz('quiz-nosql-2', this, true)" class="quiz-option">A &nbsp;—&nbsp; Wrap it in mongoose.trusted()</button>
+          <button onclick="answerQuiz('quiz-nosql-2', this, false)" class="quiz-option">B &nbsp;—&nbsp; Nothing, Mongoose knows which operators are yours</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-nosql-2-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 04 SESSION ═══════════ -->
+    <section class="section-block animate-fade-up" id="session">
+      <div class="section-header">
+        <div class="section-num-big">04</div>
+        <div class="section-header-text">
+          <div class="section-title">Session Hijacking</div>
+          <div class="section-subtitle">Someone else gets a copy of a valid login token and uses it</div>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">What it is</div>
+        <p class="concept-box-text">After login, the server gives the browser a token (a JWT, or a session ID). From then on, <strong>whoever sends that token is the user</strong> as far as the server knows.</p>
+        <p class="concept-box-text">Session hijacking means an attacker gets a copy of a valid token and sends requests with it. No password needed.</p>
+      </div>
+
+      <h3>How hijacking flows</h3>
+      <div class="attack-diagram" data-diagram="session"></div>
+
+      <h3>How tokens leak, and the fix for each</h3>
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead><tr><th>Leak</th><th>What goes wrong</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-title">XSS</td><td class="cell-muted">A script reads the token from <code>localStorage</code></td><td class="cell-highlight">Access token in memory, refresh token in an httpOnly cookie, fix XSS (01)</td></tr>
+            <tr><td class="cell-title">Plain HTTP</td><td class="cell-muted">Token is readable on the network, e.g. public Wi-Fi</td><td class="cell-highlight">HTTPS everywhere, <code>secure: true</code>, HSTS from helmet</td></tr>
+            <tr><td class="cell-title">Token in URL</td><td class="cell-muted"><code>?token=...</code> lands in server logs and browser history</td><td class="cell-highlight">Send tokens only in headers or cookies</td></tr>
+            <tr><td class="cell-title">No expiry</td><td class="cell-muted">A stolen JWT works forever</td><td class="cell-highlight"><code>expiresIn: '15m'</code> + refresh token rotation</td></tr>
+            <tr><td class="cell-title">Fake logout</td><td class="cell-muted">Logout only clears the frontend, server still accepts the token</td><td class="cell-highlight">Delete the session document in MongoDB</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Where the bug is</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/auth.routes.js</span>
+          <div class="code-actions"><span class="code-status bad">vulnerable</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">// login
+const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);   // never expires
+res.json({ token });                                               // frontend saves it in localStorage
+
+// logout
+router.post('/logout', (req, res) => {
+  res.json({ message: 'Logged out' });      // the token still works on the server
+});</pre>
+      </div>
+
+      <h3>How to stop it</h3>
+
+      <div class="step-row"><span class="badge badge-accent">Step 1</span><span class="step-title">A Session model, one document per refresh token</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/models/session.model.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const mongoose = require('mongoose');
+
+const sessionSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  tokenHash: { type: String, required: true, unique: true },   // sha256 of the refresh token
+  usedAt: { type: Date, default: null },                       // set when the token is used once
+  expiresAt: { type: Date, required: true },
+});
+
+// MongoDB deletes the document by itself when expiresAt passes
+sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+
+module.exports = mongoose.model('Session', sessionSchema);</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 2</span><span class="step-title">Short access token, hashed refresh token in a strict cookie</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/utils/tokens.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+const Session = require('../models/session.model');
+
+const sha256 = (value) => crypto.createHash('sha256').update(value).digest('hex');
+const WEEK = 7 * 24 * 60 * 60 * 1000;
+
+async function issueTokens(res, user) {
+  const accessToken = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.ACCESS_SECRET,
+    { expiresIn: '15m' }                    // a stolen copy dies fast
+  );
+
+  const refreshToken = crypto.randomBytes(40).toString('hex');   // 80 hex characters
+  await Session.create({
+    user: user._id,
+    tokenHash: sha256(refreshToken),        // store the hash, never the token itself
+    expiresAt: new Date(Date.now() + WEEK),
+  });
+
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/api/auth',                      // sent only to /api/auth/* routes
+    maxAge: WEEK,
+  });
+
+  res.json({ accessToken });                // frontend keeps it in memory, not localStorage
+}
+
+module.exports = { issueTokens, sha256 };</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 3</span><span class="step-title">Rotate on every refresh and catch reused tokens</span></div>
+      <p>Each refresh token works <strong>once</strong>. If an already-used token shows up again, two people hold a copy: the real user and someone else. The server cannot tell who is who, so it ends every session of that user.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/auth.routes.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const { cookie } = require('express-validator');
+const { issueTokens, sha256 } = require('../utils/tokens');
+
+router.post(
+  '/refresh',
+  cookie('refreshToken').isString().isHexadecimal().isLength({ min: 80, max: 80 }),
+  validate,
+  async (req, res) => {
+    const hash = sha256(req.cookies.refreshToken);
+
+    // mark the token as used in one atomic step
+    const session = await Session.findOneAndUpdate(
+      { tokenHash: hash, usedAt: null },
+      { usedAt: new Date() }
+    );
+
+    if (!session) {
+      // token exists but was already used: a copy is out there
+      const reused = await Session.findOne({ tokenHash: hash });
+      if (reused) await Session.deleteMany({ user: reused.user });
+      res.clearCookie('refreshToken', { path: '/api/auth' });
+      return res.status(401).json({ message: 'Please log in again' });
+    }
+
+    if (session.expiresAt &lt; new Date()) {
+      return res.status(401).json({ message: 'Session expired' });
+    }
+
+    const user = await User.findById(session.user);
+    await issueTokens(res, user);            // new access token + new refresh token
+  }
+);</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-green">Step 4</span><span class="step-title">Make logout real</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/auth.routes.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">router.post('/logout', async (req, res) => {
+  const token = req.cookies.refreshToken;
+  if (token) await Session.deleteOne({ tokenHash: sha256(token) });
+  res.clearCookie('refreshToken', { path: '/api/auth' });
+  res.json({ message: 'Logged out' });
+});</pre>
+      </div>
+
+      <div class="note-box">
+        <div class="note-box-icon">💡</div>
+        <p class="note-box-text"><strong>Using express-session instead of JWT?</strong> Call <code>req.session.regenerate()</code> right after a successful login. If you reuse the session ID that existed before login, an attacker who planted that ID can use it (this is called session fixation).</p>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · Session hijacking</div>
+        <p class="quiz-question">With the vulnerable code, the user clicks Logout. Is a stolen copy of the JWT still usable?</p>
+        <div class="quiz-options" id="quiz-session-1">
+          <button onclick="answerQuiz('quiz-session-1', this, false)" class="quiz-option">A &nbsp;—&nbsp; No, logout makes the token invalid</button>
+          <button onclick="answerQuiz('quiz-session-1', this, true)" class="quiz-option">B &nbsp;—&nbsp; Yes, a JWT stays valid until it expires, and this one never does</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-session-1-feedback"></div>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · Session hijacking</div>
+        <p class="quiz-question">Why store <code>sha256(refreshToken)</code> in MongoDB instead of the token itself?</p>
+        <div class="quiz-options" id="quiz-session-2">
+          <button onclick="answerQuiz('quiz-session-2', this, true)" class="quiz-option">A &nbsp;—&nbsp; If the database leaks, the hashes can't be used as cookies</button>
+          <button onclick="answerQuiz('quiz-session-2', this, false)" class="quiz-option">B &nbsp;—&nbsp; Hashing makes the cookie smaller to send</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-session-2-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 05 BRUTE FORCE ═══════════ -->
+    <section class="section-block animate-fade-up" id="brute">
+      <div class="section-header">
+        <div class="section-num-big">05</div>
+        <div class="section-header-text">
+          <div class="section-title">Brute Force</div>
+          <div class="section-subtitle">Guessing passwords by sending login requests again and again</div>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">What it is</div>
+        <p class="concept-box-text">The attacker sends login requests in a loop, each with a different password guess, until one works. A script can send thousands of guesses per minute.</p>
+        <p class="concept-box-text">Without limits, your server answers every single one, runs a database query and a bcrypt compare each time, and sooner or later a weak password falls.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead><tr><th>Variant</th><th>What the attacker tries</th><th>What stops it</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-title">Brute force</td><td class="cell-muted">Many passwords against one account</td><td class="cell-highlight">Per-IP rate limit + account lock</td></tr>
+            <tr><td class="cell-title">Password spraying</td><td class="cell-muted">One common password against many accounts</td><td class="cell-highlight">Per-IP rate limit + strong password rules</td></tr>
+            <tr><td class="cell-title">Credential stuffing</td><td class="cell-muted">Email + password pairs leaked from other websites</td><td class="cell-highlight">Rate limit, account lock, 2FA</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>How brute force flows</h3>
+      <div class="attack-diagram" data-diagram="brute"></div>
+
+      <h3>Where the bug is</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/auth.routes.js</span>
+          <div class="code-actions"><span class="code-status bad">vulnerable</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">// no limit, and the errors tell the attacker which part was wrong
+router.post('/login', async (req, res) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) return res.status(404).json({ message: 'No account with this email' });
+
+  const ok = await bcrypt.compare(req.body.password, user.password);
+  if (!ok) return res.status(401).json({ message: 'Wrong password' });
+
+  await issueTokens(res, user);
+});</pre>
+      </div>
+
+      <h3>How to stop it</h3>
+
+      <div class="step-row"><span class="badge badge-accent">Step 1</span><span class="step-title">Validate login and register input</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/auth.routes.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const { body } = require('express-validator');
+
+const loginRules = [
+  body('email').isEmail().withMessage('Enter a valid email').normalizeEmail(),
+  body('password').isString().isLength({ min: 8, max: 72 }),   // bcrypt only reads 72 bytes
+];
+
+const registerRules = [
+  body('email').isEmail().normalizeEmail(),
+  body('password')
+    .isString()
+    .isStrongPassword().withMessage('Use 8+ characters with upper, lower, number and symbol'),
+];</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 2</span><span class="step-title">Rate limit the login route</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/auth.routes.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const { rateLimit } = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,         // 15 minutes
+  limit: 5,                         // 5 failed attempts per IP per window
+  skipSuccessfulRequests: true,     // a correct login does not count
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { message: 'Too many login attempts. Try again in 15 minutes.' },
+});
+
+router.post('/login', loginLimiter, loginRules, validate, login);</pre>
+      </div>
+      <div class="table-wrap">
+        <table class="flag-table">
+          <thead><tr><th>Option</th><th>Value used</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><span class="flag-name">windowMs</span></td><td><span class="flag-val">900000</span></td><td>Length of the counting window in milliseconds (15 minutes).</td></tr>
+            <tr><td><span class="flag-name">limit</span></td><td><span class="flag-val">5</span></td><td>Requests allowed per IP in one window. Request 6 gets <code>429 Too Many Requests</code>.</td></tr>
+            <tr><td><span class="flag-name">skipSuccessfulRequests</span></td><td><span class="flag-val">true</span></td><td>Only failed logins (status 400 and up) are counted.</td></tr>
+            <tr><td><span class="flag-name">standardHeaders</span></td><td><span class="flag-val">'draft-8'</span></td><td>Sends the standard <code>RateLimit</code> headers so clients know when to retry.</td></tr>
+            <tr><td><span class="flag-name">legacyHeaders</span></td><td><span class="flag-val">false</span></td><td>Turns off the old <code>X-RateLimit-*</code> headers.</td></tr>
+            <tr><td><span class="flag-name">message</span></td><td><span class="flag-val">{ message }</span></td><td>JSON body sent with the 429 response.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 3</span><span class="step-title">Lock the account, whatever the IP</span></div>
+      <p>An attacker can switch IPs, so the per-IP limit is not enough on its own. Count failures on the user document too.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/models/user.model.js (extra fields)</span>
+          <div class="code-actions"><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">failedLogins: { type: Number, default: 0 },
+lockUntil: { type: Date },</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/controllers/auth.controller.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">async function login(req, res) {
+  const { email, password } = matchedData(req);
+  const user = await User.findOne({ email }).select('+password');
+
+  // same answer for "no such email" and "wrong password"
+  const invalid = () => res.status(401).json({ message: 'Invalid email or password' });
+  if (!user) return invalid();
+
+  if (user.lockUntil && user.lockUntil > Date.now()) {
+    return res.status(429).json({ message: 'Too many attempts. Try again later.' });
+  }
+
+  const ok = await bcrypt.compare(password, user.password);
+  if (!ok) {
+    user.failedLogins += 1;
+    if (user.failedLogins >= 10) {
+      user.lockUntil = new Date(Date.now() + 15 * 60 * 1000);   // lock for 15 minutes
+      user.failedLogins = 0;
+    }
+    await user.save();
+    return invalid();
+  }
+
+  user.failedLogins = 0;
+  user.lockUntil = undefined;
+  await user.save();
+  await issueTokens(res, user);
+}</pre>
+      </div>
+
+      <div class="warning-box">
+        <div class="warning-box-icon">⚠️</div>
+        <p class="warning-box-text"><strong>Behind a load balancer? Set <code>app.set('trust proxy', 1)</code>.</strong> Without it, every request looks like it comes from the load balancer's IP, so all your users share one counter and get blocked together. With more than one pod, use a shared store like <code>rate-limit-redis</code> so every pod sees the same counts.</p>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · Brute force</div>
+        <p class="quiz-question">Your API runs behind an AWS load balancer and you forgot <code>app.set('trust proxy', 1)</code>. What happens with the login limiter?</p>
+        <div class="quiz-options" id="quiz-brute-1">
+          <button onclick="answerQuiz('quiz-brute-1', this, true)" class="quiz-option">A &nbsp;—&nbsp; Every user shares the load balancer's IP, so everyone gets blocked together</button>
+          <button onclick="answerQuiz('quiz-brute-1', this, false)" class="quiz-option">B &nbsp;—&nbsp; Nothing changes, the limiter still sees each user's IP</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-brute-1-feedback"></div>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · Brute force</div>
+        <p class="quiz-question">Why return "Invalid email or password" for both a wrong email and a wrong password?</p>
+        <div class="quiz-options" id="quiz-brute-2">
+          <button onclick="answerQuiz('quiz-brute-2', this, false)" class="quiz-option">A &nbsp;—&nbsp; It is shorter to write</button>
+          <button onclick="answerQuiz('quiz-brute-2', this, true)" class="quiz-option">B &nbsp;—&nbsp; So the attacker can't find out which emails have accounts</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-brute-2-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 06 DOS ═══════════ -->
+    <section class="section-block animate-fade-up" id="dos">
+      <div class="section-header">
+        <div class="section-num-big">06</div>
+        <div class="section-header-text">
+          <div class="section-title">DoS &amp; DDoS</div>
+          <div class="section-subtitle">Keeping the server so busy that real users can't use it</div>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">What it is</div>
+        <p class="concept-box-text"><strong>Denial of Service (DoS)</strong>: make the server so busy that it can't answer real users. Nothing is stolen. The goal is to take the service down.</p>
+        <p class="concept-box-text">It comes in two shapes: <strong>too many requests</strong>, or <strong>a few very expensive requests</strong> (a huge JSON body, <code>?limit=1000000</code>, a slow query without an index). <strong>DDoS</strong> is the same thing from thousands of machines at once.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead><tr><th>What</th><th>DoS</th><th>DDoS</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-title">Source</td><td class="cell-muted">One machine, one IP</td><td class="cell-muted">Thousands of hacked machines (a botnet)</td></tr>
+            <tr><td class="cell-title">Block one IP?</td><td class="cell-highlight">Works ✓</td><td class="cell-muted">Useless, there are thousands</td></tr>
+            <tr><td class="cell-title">Per-IP rate limit?</td><td class="cell-highlight">Works ✓</td><td class="cell-muted">Each IP stays under the limit</td></tr>
+            <tr><td class="cell-title">Where to stop it</td><td class="cell-muted">Inside Express</td><td class="cell-highlight">At the edge: CDN, WAF, cloud provider ✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>How DoS and DDoS flow</h3>
+      <div class="attack-diagram" data-diagram="dos"></div>
+
+      <h3>Where the bug is</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/app.js + src/routes/post.routes.js</span>
+          <div class="code-actions"><span class="code-status bad">vulnerable</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">app.use(express.json());                     // accepts bodies up to the default 100kb, no rate limit
+
+router.get('/', async (req, res) => {
+  const limit = Number(req.query.limit);     // ?limit=1000000 is accepted
+  const posts = await Post.find().limit(limit);
+  res.json(posts);
+});</pre>
+      </div>
+
+      <h3>How to stop it</h3>
+
+      <div class="step-row"><span class="badge badge-accent">Step 1</span><span class="step-title">Small body limit</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/app.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">app.use(express.json({ limit: '10kb' }));                           // bigger bodies get 413
+app.use(express.urlencoded({ extended: false, limit: '10kb' }));</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 2</span><span class="step-title">A global rate limit for the API</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/app.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const { rateLimit } = require('express-rate-limit');
+
+app.set('trust proxy', 1);                   // real client IP from the load balancer
+
+app.use('/api', rateLimit({
+  windowMs: 60 * 1000,                       // 1 minute
+  limit: 100,                                // 100 requests per IP per minute
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+}));</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 3</span><span class="step-title">Cap expensive queries with express-validator</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/routes/post.routes.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const { query, matchedData } = require('express-validator');
+
+const listRules = [
+  query('page').optional().isInt({ min: 1, max: 1000 }).toInt(),
+  query('limit').optional().isInt({ min: 1, max: 50 }).toInt(),   // never more than 50
+];
+
+router.get('/', listRules, validate, async (req, res) => {
+  const { page = 1, limit = 20 } = matchedData(req);
+
+  const posts = await Post.find()
+    .sort({ createdAt: -1 })                // make sure createdAt has an index
+    .skip((page - 1) * limit)
+    .limit(limit)
+    .maxTimeMS(2000)                        // MongoDB stops the query after 2 seconds
+    .lean();
+
+  res.json(posts);
+});</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-blue">Step 4</span><span class="step-title">For DDoS, stop it before it reaches Express</span></div>
+      <p>No Express middleware can survive traffic from thousands of IPs on its own, because the requests still reach your server and use its network and CPU. Protection has to sit in front of your app.</p>
+      <div class="scale-diagram">
+        <span class="highlight">Traffic from 20,000 IPs hits your domain</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+        <span class="green">CDN / WAF (Cloudflare, AWS Shield + AWS WAF) drops known-bad and excess traffic</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+        <span class="highlight">Load balancer spreads what is left across pods</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+        <span class="green">Kubernetes HPA adds pods when CPU climbs</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+        <span class="green">Express: body limit + rate limit (Redis store) + capped queries ✅</span>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · DoS &amp; DDoS</div>
+        <p class="quiz-question">A DDoS comes from 20,000 IPs, each sending only 5 requests a minute. Will your per-IP limit of 100 per minute stop it?</p>
+        <div class="quiz-options" id="quiz-dos-1">
+          <button onclick="answerQuiz('quiz-dos-1', this, false)" class="quiz-option">A &nbsp;—&nbsp; Yes, the rate limiter blocks it</button>
+          <button onclick="answerQuiz('quiz-dos-1', this, true)" class="quiz-option">B &nbsp;—&nbsp; No, every IP stays under the limit; you need edge protection like a WAF or CDN</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-dos-1-feedback"></div>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · DoS &amp; DDoS</div>
+        <p class="quiz-question">Which line stops a 50 MB JSON body from being parsed?</p>
+        <div class="quiz-options" id="quiz-dos-2">
+          <button onclick="answerQuiz('quiz-dos-2', this, true)" class="quiz-option">A &nbsp;—&nbsp; app.use(express.json({ limit: '10kb' }))</button>
+          <button onclick="answerQuiz('quiz-dos-2', this, false)" class="quiz-option">B &nbsp;—&nbsp; app.use(helmet())</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-dos-2-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 07 SLOW REQUEST ═══════════ -->
+    <section class="section-block animate-fade-up" id="slow">
+      <div class="section-header">
+        <div class="section-num-big">07</div>
+        <div class="section-header-text">
+          <div class="section-title">Slow Request Attack</div>
+          <div class="section-subtitle">Sending the request body so slowly that connections stay stuck</div>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">What it is</div>
+        <p class="concept-box-text">A normal request arrives in milliseconds. In a slow request attack, the client sends valid headers that promise a body, then sends that body <strong>extremely slowly</strong>, just fast enough that the connection never looks dead.</p>
+        <p class="concept-box-text">The server keeps the connection open, waiting for the rest. Repeat this on many connections and the server runs out of room for real users, while almost no traffic shows up on your graphs.</p>
+      </div>
+
+      <h3>How a slow request attack flows</h3>
+      <div class="attack-diagram" data-diagram="slowbody"></div>
+
+      <div class="warning-box">
+        <div class="warning-box-icon">⚠️</div>
+        <p class="warning-box-text"><strong>express-validator can't help here.</strong> Validation runs after the whole body has arrived. This attack happens before that, while the body is still coming in. It is stopped at the connection level, with timeouts.</p>
+      </div>
+
+      <h3>Where the bug is</h3>
+      <p>Since Node 18, <code>server.requestTimeout</code> defaults to 5 minutes. That means a connection can be held for up to 5 minutes before Node closes it. Before Node 18 there was no limit at all.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/server.js</span>
+          <div class="code-actions"><span class="code-status bad">vulnerable</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const app = require('./app');
+
+app.listen(process.env.PORT || 3000);      // default timeouts: a stuck request may live for minutes</pre>
+      </div>
+
+      <h3>How to stop it</h3>
+
+      <div class="step-row"><span class="badge badge-accent">Step 1</span><span class="step-title">Set Node's connection timeouts</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/server.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const app = require('./app');
+
+const server = app.listen(process.env.PORT || 3000, () => {
+  console.log('API running');
+});
+
+server.headersTimeout = 10_000;      // all headers within 10s of the first byte
+server.requestTimeout = 30_000;      // headers + body within 30s, or the connection is closed
+server.keepAliveTimeout = 5_000;     // close idle keep-alive connections after 5s</pre>
+      </div>
+      <div class="table-wrap">
+        <table class="flag-table">
+          <thead><tr><th>Setting</th><th>Node default</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><td><span class="flag-name">requestTimeout</span></td><td><span class="flag-val">300000 (5 min)</span></td><td>Deadline for the <strong>whole request</strong>, headers and body. This is the one that stops slow bodies.</td></tr>
+            <tr><td><span class="flag-name">headersTimeout</span></td><td><span class="flag-val">60000 (60 s)</span></td><td>Deadline for the headers only. Stops Slowloris (section 08).</td></tr>
+            <tr><td><span class="flag-name">keepAliveTimeout</span></td><td><span class="flag-val">5000 (5 s)</span></td><td>How long an idle connection stays open after a response.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 2</span><span class="step-title">Keep the body limit from section 06</span></div>
+      <p><code>express.json({ limit: '10kb' })</code> rejects a body as soon as it grows past 10 KB, so the attacker can't keep a connection busy with a huge upload either.</p>
+
+      <div class="step-row"><span class="badge badge-blue">Step 3</span><span class="step-title">Let a reverse proxy face slow clients</span></div>
+      <p>In production, NGINX or a load balancer sits in front of Node. It reads the whole request first and only then forwards it to Express. Slow clients get stuck at the proxy, which is built to hold many connections cheaply.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">nginx.conf (inside the server block)</span>
+          <div class="code-actions"><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="sh">client_header_timeout 10s;   # headers must arrive within 10s
+client_body_timeout   10s;   # max wait between two pieces of the body
+client_max_body_size  1m;    # refuse bodies above 1 MB</pre>
+      </div>
+
+      <div class="note-box">
+        <div class="note-box-icon">💡</div>
+        <p class="note-box-text"><strong>Running behind an AWS ALB?</strong> The ALB faces the slow client, not Node. Then set <code>server.keepAliveTimeout</code> higher than the ALB idle timeout (60 s by default), for example <code>65_000</code>. If Node closes idle connections before the ALB does, you get random 502 errors.</p>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · Slow request</div>
+        <p class="quiz-question">Can express-validator stop a slow request attack?</p>
+        <div class="quiz-options" id="quiz-slow-1">
+          <button onclick="answerQuiz('quiz-slow-1', this, false)" class="quiz-option">A &nbsp;—&nbsp; Yes, add .isLength() to the body fields</button>
+          <button onclick="answerQuiz('quiz-slow-1', this, true)" class="quiz-option">B &nbsp;—&nbsp; No, the body never finishes arriving, so validation never runs</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-slow-1-feedback"></div>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · Slow request</div>
+        <p class="quiz-question">Which Node setting limits the total time to receive headers <em>and</em> body?</p>
+        <div class="quiz-options" id="quiz-slow-2">
+          <button onclick="answerQuiz('quiz-slow-2', this, true)" class="quiz-option">A &nbsp;—&nbsp; server.requestTimeout</button>
+          <button onclick="answerQuiz('quiz-slow-2', this, false)" class="quiz-option">B &nbsp;—&nbsp; server.keepAliveTimeout</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-slow-2-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 08 SLOWLORIS ═══════════ -->
+    <section class="section-block animate-fade-up" id="slowloris">
+      <div class="section-header">
+        <div class="section-num-big">08</div>
+        <div class="section-header-text">
+          <div class="section-title">Slowloris</div>
+          <div class="section-subtitle">Opening many connections whose headers never finish</div>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">What it is</div>
+        <p class="concept-box-text">HTTP headers end with <strong>one empty line</strong>. Until that line arrives, the server can't start handling the request, so it keeps waiting.</p>
+        <p class="concept-box-text">Slowloris opens many connections and sends only part of the headers on each. Every so often it adds one more header line, so the connection never goes idle. It is a slow request attack aimed at the <strong>headers</strong> instead of the body.</p>
+      </div>
+
+      <h3>How Slowloris flows</h3>
+      <div class="attack-diagram" data-diagram="slowloris"></div>
+
+      <h3>Flood vs slow body vs Slowloris</h3>
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead><tr><th>What</th><th>Flood (DoS)</th><th>Slow body (07)</th><th>Slowloris (08)</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-title">What is slow</td><td class="cell-muted">Nothing, just a lot of requests</td><td class="cell-muted">The body</td><td class="cell-muted">The headers</td></tr>
+            <tr><td class="cell-title">Bandwidth used</td><td class="cell-muted">High</td><td class="cell-muted">Very low</td><td class="cell-muted">Very low</td></tr>
+            <tr><td class="cell-title">On your graphs</td><td class="cell-muted">A clear traffic spike</td><td class="cell-muted">A few slow uploads</td><td class="cell-muted">A few slow clients</td></tr>
+            <tr><td class="cell-title">Stopped by</td><td class="cell-highlight">Rate limit, WAF</td><td class="cell-highlight">requestTimeout, client_body_timeout</td><td class="cell-highlight">headersTimeout, client_header_timeout</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-box-label">Why an idle timeout is not enough</div>
+        <p class="concept-box-text">An idle timeout (<code>server.timeout</code>) resets every time a byte arrives. Slowloris sends a byte just before it would fire, so it never fires. <code>server.headersTimeout</code> counts the <strong>total</strong> time from the first byte, so the trick stops working.</p>
+      </div>
+
+      <h3>How to stop it</h3>
+
+      <div class="step-row"><span class="badge badge-accent">Step 1</span><span class="step-title">Set headersTimeout</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/server.js</span>
+          <div class="code-actions"><span class="code-status good">fixed</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">server.headersTimeout = 10_000;   // headers not done 10s after the first byte: Node sends 408 and closes
+server.requestTimeout = 30_000;   // keep this larger than headersTimeout</pre>
+      </div>
+
+      <div class="step-row"><span class="badge badge-accent">Step 2</span><span class="step-title">Proxy timeout in front</span></div>
+      <p>The same NGINX setting from section 07, <code>client_header_timeout 10s</code>, stops Slowloris before it reaches Node. Managed load balancers like AWS ALB also wait for complete headers before they forward anything.</p>
+
+      <div class="step-row"><span class="badge badge-green">Verify</span><span class="step-title">Print the values your server is really using</span></div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/server.js</span>
+          <div class="code-actions"><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">console.log({
+  headersTimeout: server.headersTimeout,       // expect 10000
+  requestTimeout: server.requestTimeout,       // expect 30000
+  keepAliveTimeout: server.keepAliveTimeout,   // expect 5000
+});</pre>
+      </div>
+
+      <div class="note-box">
+        <div class="note-box-icon">💡</div>
+        <p class="note-box-text"><strong>Why old servers suffered most.</strong> Slowloris was famous against servers that gave every connection its own thread, like Apache in prefork mode: a few hundred stuck connections used up every thread. Node does not block a thread per connection, but each open socket still costs memory and a file descriptor, so you still need the timeout.</p>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · Slowloris</div>
+        <p class="quiz-question">Why does an idle timeout (<code>server.timeout</code>) not stop Slowloris?</p>
+        <div class="quiz-options" id="quiz-loris-1">
+          <button onclick="answerQuiz('quiz-loris-1', this, true)" class="quiz-option">A &nbsp;—&nbsp; Each new header line resets the idle timer</button>
+          <button onclick="answerQuiz('quiz-loris-1', this, false)" class="quiz-option">B &nbsp;—&nbsp; It only applies to HTTPS connections</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-loris-1-feedback"></div>
+      </div>
+
+      <div class="quiz-box">
+        <div class="quiz-label">Quick check · Slowloris</div>
+        <p class="quiz-question">Slowloris keeps which part of the request unfinished?</p>
+        <div class="quiz-options" id="quiz-loris-2">
+          <button onclick="answerQuiz('quiz-loris-2', this, false)" class="quiz-option">A &nbsp;—&nbsp; The body</button>
+          <button onclick="answerQuiz('quiz-loris-2', this, true)" class="quiz-option">B &nbsp;—&nbsp; The headers</button>
+        </div>
+        <div class="quiz-feedback hidden" id="quiz-loris-2-feedback"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ 09 CHECKLIST ═══════════ -->
+    <section class="section-block animate-fade-up" id="checklist">
+      <div class="section-header">
+        <div class="section-num-big">09</div>
+        <div class="section-header-text">
+          <div class="section-title">Defense Checklist</div>
+          <div class="section-subtitle">Every attack, what stops it, and the full hardened setup</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead><tr><th>Attack</th><th>First defense</th><th>Package / setting</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-title"><a href="#xss">XSS</a></td><td class="cell-muted">Validate + escape, render as text, CSP</td><td class="cell-highlight"><code>.escape()</code>, no <code>dangerouslySetInnerHTML</code>, <code>helmet()</code></td></tr>
+            <tr><td class="cell-title"><a href="#csrf">CSRF</a></td><td class="cell-muted">Cookies not sent cross-site, CSRF token</td><td class="cell-highlight"><code>sameSite: 'strict'</code>, <code>csrf-csrf</code></td></tr>
+            <tr><td class="cell-title"><a href="#nosql">NoSQL injection</a></td><td class="cell-muted">Type checks, only validated fields</td><td class="cell-highlight"><code>.isString()</code>, <code>matchedData()</code>, <code>sanitizeFilter</code></td></tr>
+            <tr><td class="cell-title"><a href="#session">Session hijacking</a></td><td class="cell-muted">Short tokens, httpOnly cookie, rotation</td><td class="cell-highlight"><code>expiresIn: '15m'</code>, Session model</td></tr>
+            <tr><td class="cell-title"><a href="#brute">Brute force</a></td><td class="cell-muted">Limit attempts, lock the account</td><td class="cell-highlight"><code>express-rate-limit</code>, <code>failedLogins</code></td></tr>
+            <tr><td class="cell-title"><a href="#dos">DoS / DDoS</a></td><td class="cell-muted">Cheap requests, edge filtering</td><td class="cell-highlight"><code>express.json({ limit })</code>, WAF / CDN</td></tr>
+            <tr><td class="cell-title"><a href="#slow">Slow request</a></td><td class="cell-muted">Deadline for the whole request</td><td class="cell-highlight"><code>server.requestTimeout</code>, NGINX</td></tr>
+            <tr><td class="cell-title"><a href="#slowloris">Slowloris</a></td><td class="cell-muted">Deadline for the headers</td><td class="cell-highlight"><code>server.headersTimeout</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Everything together</h3>
+      <p>Order matters. Security headers and rate limits run first so bad traffic is dropped early. Body parsing comes next, then cookies and CSRF, then your routes.</p>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/app.js</span>
+          <div class="code-actions"><span class="code-status good">hardened</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const express = require('express');
+const helmet = require('helmet');
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const { rateLimit } = require('express-rate-limit');
+
+mongoose.set('sanitizeFilter', true);           // 03 NoSQL injection safety net
+
+const app = express();
+app.set('trust proxy', 1);                       // real client IP behind ALB / NGINX
+
+app.use(helmet());                               // 01 XSS: CSP + security headers
+app.use('/api', rateLimit({                      // 06 DoS: 100 req / min / IP
+  windowMs: 60 * 1000,
+  limit: 100,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+}));
+app.use(express.json({ limit: '10kb' }));        // 06 DoS: small bodies only
+app.use(cookieParser());
+
+// 02 CSRF: add doubleCsrfProtection here if your auth uses cookies
+
+app.use('/api/auth', require('./routes/auth.routes'));    // 04 + 05: rotation, login limiter
+app.use('/api/posts', require('./routes/post.routes'));   // 01 + 06: escaped comments, capped lists
+app.use('/api/users', require('./routes/user.routes'));   // 02: validated email change
+
+module.exports = app;</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label">src/server.js</span>
+          <div class="code-actions"><span class="code-status good">hardened</span><button class="code-copy-btn" onclick="copyCode(this)">copy</button></div>
+        </div>
+        <pre class="code-pre" data-lang="js">const app = require('./app');
+
+const server = app.listen(process.env.PORT || 3000);
+
+server.headersTimeout = 10_000;    // 08 Slowloris
+server.requestTimeout = 30_000;    // 07 Slow request
+server.keepAliveTimeout = 5_000;   // raise above the ALB idle timeout if you run behind one</pre>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <span>Sheryians Coding School · Web Attack Notes</span>
+      <span>Express 5 · MongoDB · express-validator v7</span>
+    </footer>
+
+    </div>
+  </main>
+</div>
+
+<script>
+/* ════════════ Code highlighting ════════════ */
+(function () {
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const span = (cls, s) => '<span class="token-' + cls + '">' + esc(s) + '</span>';
+  const KW = new Set(['const', 'let', 'var', 'function', 'return', 'if', 'else', 'await', 'async', 'new',
+    'true', 'false', 'null', 'undefined', 'try', 'catch', 'throw', 'typeof', 'of', 'in', 'for', 'module']);
+
+  function hlJS(src) {
+    const re = /(\/\/[^\n]*)|(`(?:\\[\s\S]|[^`\\])*`|'(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*")|(\b\d[\d_]*(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      if (m[1]) out += span('comment', m[1]);
+      else if (m[2]) out += span('string', m[2]);
+      else if (m[3]) out += span('val', m[3]);
+      else {
+        const w = m[4];
+        const rest = src.slice(re.lastIndex, re.lastIndex + 40);
+        if (KW.has(w)) out += span('kw', w);
+        else if (/^\s*\(/.test(rest)) out += span('fn', w);
+        else if (/^\s*:(?!:)/.test(rest)) out += span('key', w);
+        else out += esc(w);
+      }
+      last = re.lastIndex;
+    }
+    return out + esc(src.slice(last));
+  }
+
+  function hlSh(src) {
+    return src.split('\n').map((line) => {
+      const ci = line.indexOf('#');
+      const code = ci >= 0 ? line.slice(0, ci) : line;
+      const com = ci >= 0 ? line.slice(ci) : '';
+      let first = true;
+      const parts = code.match(/"[^"]*"|'[^']*'|\s+|\S+/g) || [];
+      const html = parts.map((p) => {
+        if (/^\s+$/.test(p)) return p;
+        if (first) { first = false; return span('command', p); }
+        if (/^["']/.test(p)) return span('string', p);
+        if (/^-/.test(p)) return span('flag', p);
+        return span('val', p);
+      }).join('');
+      return html + (com ? span('comment', com) : '');
+    }).join('\n');
+  }
+
+  function hlPlain(src) {
+    return src.split('\n').map((line) => {
+      const ci = line.indexOf('#');
+      return ci >= 0 ? esc(line.slice(0, ci)) + span('comment', line.slice(ci)) : esc(line);
+    }).join('\n');
+  }
+
+  document.querySelectorAll('pre.code-pre[data-lang]').forEach((pre) => {
+    const lang = pre.dataset.lang;
+    const src = pre.textContent;
+    pre.innerHTML = lang === 'js' ? hlJS(src) : lang === 'sh' ? hlSh(src) : hlPlain(src);
+  });
+})();
+
+/* ════════════ Copy button ════════════ */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  const done = (label) => { btn.textContent = label; setTimeout(() => { btn.textContent = 'copy'; }, 1400); };
+  const fallback = () => {
+    const r = document.createRange();
+    r.selectNodeContents(pre);
+    const s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+    done('selected');
+  };
+  try {
+    navigator.clipboard.writeText(text).then(() => done('copied'), fallback);
+  } catch (e) { fallback(); }
+}
+
+/* ════════════ Quiz ════════════ */
+function answerQuiz(quizId, btn, isCorrect) {
+  const container = document.getElementById(quizId);
+  const feedback = document.getElementById(quizId + '-feedback');
+  container.querySelectorAll('.quiz-option').forEach((b) => {
+    b.disabled = true;
+    b.style.opacity = '0.6';
+  });
+  if (isCorrect) {
+    btn.classList.add('correct');
+    feedback.textContent = '✓ Correct!';
+    feedback.className = 'quiz-feedback correct';
+  } else {
+    btn.classList.add('incorrect');
+    feedback.textContent = '✗ Not quite — try reviewing that section.';
+    feedback.className = 'quiz-feedback incorrect';
+  }
+}
+
+/* ════════════ .escape() playground ════════════ */
+(function () {
+  const input = document.getElementById('esc-input');
+  const saved = document.getElementById('esc-saved');
+  const screen = document.getElementById('esc-screen');
+  if (!input) return;
+  // same replacements express-validator's escape() makes (via validator.js)
+  const escapeLikeValidator = (s) => s
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\//g, '&#x2F;')
+    .replace(/\\/g, '&#x5C;')
+    .replace(/`/g, '&#96;');
+  const update = () => {
+    saved.textContent = escapeLikeValidator(input.value);
+    screen.textContent = input.value;   // the browser decodes entities and shows plain characters
+  };
+  input.addEventListener('input', update);
+  update();
+})();
+
+/* ════════════ Step-through attack diagrams ════════════ */
+const LT = '<';
+const DIAGRAMS = {
+  xss: {
+    name: 'Stored XSS', w: 800, h: 320,
+    nodes: [
+      { id: 'attacker', x: 95, y: 70, icon: 'attacker', label: 'Attacker', sub: 'any browser' },
+      { id: 'victim', x: 95, y: 250, icon: 'browser', label: 'Victim', sub: 'logged-in user' },
+      { id: 'server', x: 400, y: 160, icon: 'server', label: 'Express API', sub: 'api.yourapp.com' },
+      { id: 'db', x: 705, y: 160, icon: 'db', label: 'MongoDB', sub: 'comments' },
+    ],
+    steps: [
+      { tone: 'bad', title: 'Attacker posts a comment',
+        text: `The attacker sends a comment through the normal API. Inside the text there is an HTML <code>&lt;script&gt;</code> tag. To the server it is just a string in a JSON body.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'POST /comments' }],
+        states: { attacker: 'bad', server: 'active', victim: 'dim' } },
+      { tone: 'bad', title: 'Server saves it as-is',
+        text: `The route has no validation and no escaping. The comment, script tag included, is written to MongoDB. Now it waits there for every visitor.`,
+        packets: [{ f: 'server', t: 'db', label: 'insertOne(text)' }],
+        states: { server: 'bad', db: 'bad', victim: 'dim' } },
+      { tone: 'info', title: 'A real user opens the post',
+        text: `The victim opens the post. The frontend calls the API to load its comments.`,
+        packets: [{ f: 'victim', t: 'server', label: 'GET /posts/42' }],
+        states: { victim: 'active', server: 'active', db: 'bad', attacker: 'dim' } },
+      { tone: 'bad', title: 'API sends the stored script back',
+        text: `The server reads the comment and returns it. The frontend puts it on the page with <code>innerHTML</code> or <code>dangerouslySetInnerHTML</code>, so the browser treats it as code instead of text.`,
+        packets: [{ f: 'db', t: 'server', label: 'comment doc' }, { f: 'server', t: 'victim', label: '200 JSON' }],
+        states: { victim: 'bad', server: 'active', db: 'bad', attacker: 'dim' } },
+      { tone: 'bad', title: 'The script runs as the victim',
+        text: `The script runs inside your site with the victim's login. It can read the page, call your API as the user, and send what it finds to the attacker.`,
+        packets: [{ f: 'victim', t: 'attacker', label: 'stolen data' }],
+        states: { victim: 'bad', attacker: 'bad' } },
+      { tone: 'good', title: 'Fixed: validate and escape',
+        text: `express-validator checks the text and escapes it before saving. <code>&lt;</code> becomes <code>&amp;lt;</code>, so a browser shows the characters as plain text. Nothing runs.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'POST /comments', tone: 'bad' }, { f: 'server', t: 'db', label: 'escaped text' }],
+        states: { server: 'safe', db: 'safe', victim: 'safe', attacker: 'dim' } },
+    ],
+  },
+
+  csrf: {
+    name: 'Cross-site request forgery', w: 800, h: 330,
+    nodes: [
+      { id: 'victim', x: 95, y: 160, icon: 'browser', label: 'Victim browser', sub: 'has token cookie' },
+      { id: 'evil', x: 400, y: 55, icon: 'site', label: 'Other website', sub: "attacker's page" },
+      { id: 'server', x: 400, y: 265, icon: 'server', label: 'Express API', sub: 'api.yourapp.com' },
+      { id: 'db', x: 705, y: 265, icon: 'db', label: 'MongoDB', sub: 'users' },
+    ],
+    steps: [
+      { tone: 'info', title: 'Victim logs in',
+        text: `The user logs in. The server sends the JWT in a cookie named <code>token</code>. From now on the browser adds this cookie to every request that goes to your API, on its own.`,
+        packets: [{ f: 'victim', t: 'server', label: 'POST /auth/login' }, { f: 'server', t: 'victim', label: 'Set-Cookie: token' }],
+        states: { victim: 'active', server: 'active', evil: 'dim' } },
+      { tone: 'info', title: 'Victim opens another site',
+        text: `In another tab, the user opens a link from a message or an email. The page belongs to the attacker. The user is still logged in to your app.`,
+        packets: [{ f: 'victim', t: 'evil', label: 'GET /' }],
+        states: { victim: 'active', evil: 'bad' } },
+      { tone: 'bad', title: 'The page carries a hidden form',
+        text: `The page has a hidden form that points at your API's change-email route. It submits itself as soon as the page loads. The user sees nothing.`,
+        packets: [{ f: 'evil', t: 'victim', label: 'page + hidden form' }],
+        states: { victim: 'bad', evil: 'bad' } },
+      { tone: 'bad', title: 'Browser attaches the cookie',
+        text: `The request leaves the victim's browser, so the browser adds the <code>token</code> cookie by itself. To your server it looks exactly like a real request from the user.`,
+        packets: [{ f: 'victim', t: 'server', label: 'POST /users/me/email' }],
+        states: { victim: 'bad', server: 'bad', evil: 'dim' } },
+      { tone: 'bad', title: 'Server changes the email',
+        text: `The auth middleware finds a valid token and the route saves the attacker's email. Next the attacker uses "Forgot password", gets the reset link, and owns the account.`,
+        packets: [{ f: 'server', t: 'db', label: 'updateOne(email)' }],
+        states: { server: 'bad', db: 'bad', evil: 'dim' } },
+      { tone: 'good', title: 'Fixed: sameSite cookie + CSRF token',
+        text: `With <code>sameSite: 'strict'</code> the browser does not send the cookie on requests started by another site. The request also has no <code>x-csrf-token</code> header, so the server rejects it with 403 before the database is touched.`,
+        packets: [{ f: 'victim', t: 'server', label: 'POST (no cookie)', tone: 'bad' }, { f: 'server', t: 'victim', label: '403 Forbidden' }],
+        states: { victim: 'safe', server: 'safe', db: 'dim', evil: 'dim' } },
+    ],
+  },
+
+  nosql: {
+    name: 'NoSQL injection', w: 800, h: 250,
+    nodes: [
+      { id: 'attacker', x: 95, y: 125, icon: 'attacker', label: 'Attacker', sub: 'no reset email' },
+      { id: 'server', x: 400, y: 125, icon: 'server', label: 'Express API', sub: '/auth/reset-password' },
+      { id: 'db', x: 705, y: 125, icon: 'db', label: 'MongoDB', sub: 'users' },
+    ],
+    steps: [
+      { tone: 'bad', title: 'Attacker calls the reset route',
+        text: `This route expects <code>{ token, newPassword }</code>, where <code>token</code> is the random string from a reset email. The attacker never got that email.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'POST /reset-password' }],
+        states: { attacker: 'bad', server: 'active', db: 'dim' } },
+      { tone: 'bad', title: 'token is an object, not a string',
+        text: `Because <code>express.json()</code> parses the body, <code>req.body.token</code> can be any JSON value. The attacker sends an object that holds a MongoDB query operator instead of a string.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'token = { operator }' }],
+        states: { attacker: 'bad', server: 'bad', db: 'dim' } },
+      { tone: 'bad', title: 'The operator reaches MongoDB',
+        text: `The code drops <code>token</code> straight into <code>findOne()</code>. MongoDB reads the operator as a condition, so the filter now means "any user with a reset token" instead of "this exact token".`,
+        packets: [{ f: 'server', t: 'db', label: 'findOne(...)' }],
+        states: { server: 'bad', db: 'bad' } },
+      { tone: 'bad', title: 'A real user comes back',
+        text: `MongoDB returns a real user who asked for a reset earlier. The server believes the link was valid.`,
+        packets: [{ f: 'db', t: 'server', label: 'user document' }],
+        states: { server: 'bad', db: 'bad' } },
+      { tone: 'bad', title: 'Password replaced',
+        text: `The server saves the new password chosen by the attacker. The account is taken without the attacker ever seeing the reset email.`,
+        packets: [{ f: 'server', t: 'db', label: 'user.save()' }],
+        states: { attacker: 'bad', server: 'bad', db: 'bad' } },
+      { tone: 'good', title: 'Fixed: isString() runs first',
+        text: `express-validator checks the type before the controller runs. An object fails <code>isString()</code>, the request ends with 400, and the query never reaches MongoDB.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'token = { operator }', tone: 'bad' }, { f: 'server', t: 'attacker', label: '400 Bad Request' }],
+        states: { attacker: 'dim', server: 'safe', db: 'dim' } },
+    ],
+  },
+
+  session: {
+    name: 'Session hijacking', w: 800, h: 320,
+    nodes: [
+      { id: 'user', x: 95, y: 70, icon: 'browser', label: 'User browser', sub: 'logged in' },
+      { id: 'attacker', x: 95, y: 250, icon: 'attacker', label: 'Attacker', sub: 'has a token copy' },
+      { id: 'server', x: 400, y: 160, icon: 'server', label: 'Express API', sub: 'checks JWT' },
+      { id: 'db', x: 705, y: 160, icon: 'db', label: 'MongoDB', sub: 'sessions' },
+    ],
+    steps: [
+      { tone: 'info', title: 'User logs in',
+        text: `The server returns an access token and sets a refresh token cookie. Whoever holds these tokens is this user, as far as the server knows.`,
+        packets: [{ f: 'user', t: 'server', label: 'POST /auth/login' }, { f: 'server', t: 'user', label: 'tokens' }],
+        states: { user: 'active', server: 'active', attacker: 'dim' } },
+      { tone: 'bad', title: 'A copy of the token leaks',
+        text: `The token leaks: an XSS script reads it from <code>localStorage</code>, it travels over plain HTTP on public Wi-Fi, or it sits in a URL that ends up in logs.`,
+        packets: [{ f: 'user', t: 'attacker', label: 'token copy' }],
+        states: { user: 'bad', attacker: 'bad' } },
+      { tone: 'bad', title: 'Attacker calls the API as the user',
+        text: `The server only checks that the JWT signature is valid. It is, so the attacker gets the user's data and can act as them.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'GET /users/me' }, { f: 'server', t: 'attacker', label: '200 user data' }],
+        states: { attacker: 'bad', server: 'bad', user: 'dim' } },
+      { tone: 'bad', title: 'Logout changes nothing',
+        text: `The user clicks Logout, but the server deletes nothing and the JWT never expires. The stolen copy keeps working.`,
+        packets: [{ f: 'user', t: 'server', label: 'POST /auth/logout', tone: 'info' }, { f: 'attacker', t: 'server', label: 'GET /users/me' }],
+        states: { user: 'active', attacker: 'bad', server: 'bad' } },
+      { tone: 'good', title: 'Fixed: short tokens + rotation',
+        text: `Access tokens now die after 15 minutes, and each refresh token works once. When an already-used refresh token shows up again, the server knows a copy exists and deletes every session of that user. The attacker is out.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'POST /auth/refresh', tone: 'bad' }, { f: 'server', t: 'db', label: 'deleteMany({ user })' }],
+        states: { attacker: 'dim', server: 'safe', db: 'safe', user: 'safe' } },
+    ],
+  },
+
+  brute: {
+    name: 'Brute force login', w: 800, h: 250,
+    nodes: [
+      { id: 'attacker', x: 95, y: 125, icon: 'attacker', label: 'Attacker', sub: 'password script' },
+      { id: 'server', x: 400, y: 125, icon: 'server', label: 'Express API', sub: '/auth/login' },
+      { id: 'db', x: 705, y: 125, icon: 'db', label: 'MongoDB', sub: 'users' },
+    ],
+    steps: [
+      { tone: 'bad', title: 'Guess number 1',
+        text: `The attacker picks an email and tries a password. Wrong. The server answers 401, and the attacker tries again.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'POST /auth/login' }, { f: 'server', t: 'attacker', label: '401' }],
+        states: { attacker: 'bad', server: 'active', db: 'dim' } },
+      { tone: 'bad', title: 'Thousands of guesses',
+        text: `A script sends guesses non-stop from lists of common and leaked passwords. Every single guess makes the server query MongoDB and run bcrypt.`,
+        packets: [
+          { f: 'attacker', t: 'server', lane: -1.4 },
+          { f: 'attacker', t: 'server', lane: 0, label: 'guess 2 … 5000' },
+          { f: 'attacker', t: 'server', lane: 1.4 },
+          { f: 'server', t: 'db', label: 'findOne + bcrypt' },
+        ],
+        states: { attacker: 'bad', server: 'bad', db: 'bad' } },
+      { tone: 'bad', title: 'One guess matches',
+        text: `Weak passwords fall fast. One guess is right, and the server hands out real tokens.`,
+        packets: [{ f: 'server', t: 'attacker', label: '200 accessToken' }],
+        states: { attacker: 'bad', server: 'bad', db: 'dim' } },
+      { tone: 'good', title: 'Fixed: rate limit per IP',
+        text: `<code>express-rate-limit</code> counts failed logins per IP. After 5 failures in 15 minutes the server answers 429 straight away, without touching MongoDB or bcrypt.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'attempt 6', tone: 'bad' }, { f: 'server', t: 'attacker', label: '429 Too Many' }],
+        states: { attacker: 'dim', server: 'safe', db: 'dim' } },
+      { tone: 'good', title: 'Fixed: lock the account',
+        text: `Attackers can switch IPs, so the user document counts failures too. After 10 wrong passwords the account is locked for 15 minutes, whichever IP the guesses come from.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'new IP, same email', tone: 'bad' }, { f: 'server', t: 'db', label: 'lockUntil = +15m' }],
+        states: { attacker: 'dim', server: 'safe', db: 'safe' } },
+    ],
+  },
+
+  dos: {
+    name: 'DoS and DDoS', w: 800, h: 360,
+    slots: { on: 'server', count: 8 },
+    nodes: [
+      { id: 'user', x: 95, y: 60, icon: 'browser', label: 'Real users', sub: 'normal traffic' },
+      { id: 'attacker', x: 95, y: 175, icon: 'attacker', label: 'Attacker', sub: 'one machine' },
+      { id: 'bots', x: 95, y: 290, icon: 'bots', label: 'Botnet', sub: 'thousands of IPs' },
+      { id: 'edge', x: 330, y: 175, icon: 'shield', label: 'CDN / WAF', sub: 'edge filter' },
+      { id: 'server', x: 545, y: 175, icon: 'server', label: 'Express API', sub: 'limited capacity' },
+      { id: 'db', x: 728, y: 175, icon: 'db', label: 'MongoDB', sub: 'posts', w: 120 },
+    ],
+    steps: [
+      { tone: 'info', title: 'A normal day',
+        text: `Your server has a fixed amount of CPU, memory and open connections. Real users use a small part of it.`,
+        packets: [{ f: 'user', t: 'server', label: 'GET /api/posts' }],
+        slots: 'LL______',
+        states: { user: 'active', attacker: 'dim', bots: 'dim', edge: 'hidden' } },
+      { tone: 'bad', title: 'DoS: one machine floods',
+        text: `One machine sends requests as fast as it can, or a few very expensive ones: a huge JSON body, <code>?limit=1000000</code>, a slow query without an index.`,
+        packets: [
+          { f: 'attacker', t: 'server', lane: -1.4 },
+          { f: 'attacker', t: 'server', lane: 0, label: 'flood of requests' },
+          { f: 'attacker', t: 'server', lane: 1.4 },
+        ],
+        slots: 'AAAAALL_',
+        states: { attacker: 'bad', server: 'bad', bots: 'dim', edge: 'hidden' } },
+      { tone: 'bad', title: 'Real users time out',
+        text: `Every slot is busy with attacker work. Real requests wait, then fail. The server process is still running, but nobody can use it.`,
+        packets: [
+          { f: 'attacker', t: 'server', lane: -1.4 },
+          { f: 'attacker', t: 'server', lane: 1.4 },
+          { f: 'user', t: 'server', label: 'GET /api/posts', tone: 'info' },
+          { f: 'server', t: 'user', label: '503 / timeout' },
+        ],
+        slots: 'AAAAAAAA',
+        states: { attacker: 'bad', server: 'bad', user: 'bad', bots: 'dim', edge: 'hidden' } },
+      { tone: 'bad', title: 'DDoS: thousands of machines',
+        text: `In a DDoS the traffic comes from thousands of hacked machines. Each IP sends only a little, so blocking one IP or a per-IP rate limit does not save you.`,
+        packets: [
+          { f: 'bots', t: 'server', lane: -1.4 },
+          { f: 'bots', t: 'server', lane: 0, label: 'from 20,000 IPs' },
+          { f: 'bots', t: 'server', lane: 1.4 },
+        ],
+        slots: 'AAAAAAAA',
+        states: { bots: 'bad', server: 'bad', attacker: 'dim', user: 'dim', edge: 'hidden' } },
+      { tone: 'good', title: 'Fixed: filter at the edge, keep requests cheap',
+        text: `A CDN or WAF in front drops bad traffic before it reaches you. Inside Express, body size limits, per-IP rate limits and capped queries keep every request cheap.`,
+        packets: [
+          { f: 'bots', t: 'edge', label: 'blocked', tone: 'bad' },
+          { f: 'attacker', t: 'edge', tone: 'bad' },
+          { f: 'user', t: 'edge', tone: 'info' },
+          { f: 'edge', t: 'server', label: 'clean traffic' },
+        ],
+        slots: 'LL______',
+        states: { edge: 'safe', server: 'safe', bots: 'dim', attacker: 'dim', user: 'active' } },
+    ],
+  },
+
+  slowbody: {
+    name: 'Slow request (slow body)', w: 800, h: 330,
+    slots: { on: 'server', count: 6 },
+    nodes: [
+      { id: 'user', x: 95, y: 70, icon: 'browser', label: 'Real user', sub: 'normal client' },
+      { id: 'attacker', x: 95, y: 250, icon: 'attacker', label: 'Attacker', sub: 'very low bandwidth' },
+      { id: 'server', x: 400, y: 160, icon: 'server', label: 'Express API', sub: 'open connections' },
+      { id: 'db', x: 705, y: 160, icon: 'db', label: 'MongoDB', sub: 'idle' },
+    ],
+    steps: [
+      { tone: 'info', title: 'A normal POST',
+        text: `A normal client sends headers and body in a few milliseconds. Express parses the body, the route runs, and the connection is free again.`,
+        packets: [{ f: 'user', t: 'server', label: 'POST /api/posts' }, { f: 'server', t: 'user', label: '201 Created' }],
+        slots: 'L_____',
+        states: { user: 'active', server: 'active', attacker: 'dim', db: 'dim' } },
+      { tone: 'bad', title: 'Headers promise a big body',
+        text: `The attacker opens a connection and sends valid headers. <code>Content-Length</code> says a large body is coming, so the server starts waiting for it.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'headers: big body' }],
+        slots: 'S_____',
+        states: { attacker: 'bad', server: 'active', user: 'dim', db: 'dim' } },
+      { tone: 'bad', title: 'The body arrives very slowly',
+        text: `The body comes in tiny pieces with long pauses, just enough that the connection never looks dead. The attacker does the same on many connections at once.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'tiny piece … pause', slow: true }],
+        slots: 'SSS___',
+        states: { attacker: 'bad', server: 'bad', user: 'dim', db: 'dim' } },
+      { tone: 'bad', title: 'No room for real users',
+        text: `Almost no traffic is used, so nothing looks like a spike on your graphs. But every connection is stuck waiting, and real users can't get in.`,
+        packets: [{ f: 'user', t: 'server', label: 'POST /api/posts', tone: 'info' }, { f: 'server', t: 'user', label: 'timeout' }, { f: 'attacker', t: 'server', slow: true }],
+        slots: 'SSSSSS',
+        states: { attacker: 'bad', server: 'bad', user: 'bad', db: 'dim' } },
+      { tone: 'good', title: 'Fixed: a deadline for every request',
+        text: `<code>server.requestTimeout</code> gives every request a fixed deadline for headers and body together. A body that is not complete in time gets its connection closed, and the slot is free again.`,
+        packets: [{ f: 'server', t: 'attacker', label: '408 + close' }, { f: 'user', t: 'server', label: 'POST /api/posts', tone: 'info' }],
+        slots: 'L_____',
+        states: { attacker: 'dim', server: 'safe', user: 'active', db: 'dim' } },
+    ],
+  },
+
+  slowloris: {
+    name: 'Slowloris (slow headers)', w: 800, h: 330,
+    slots: { on: 'server', count: 6 },
+    nodes: [
+      { id: 'user', x: 95, y: 70, icon: 'browser', label: 'Real user', sub: 'normal client' },
+      { id: 'attacker', x: 95, y: 250, icon: 'attacker', label: 'Attacker', sub: 'very low bandwidth' },
+      { id: 'server', x: 400, y: 160, icon: 'server', label: 'Express API', sub: 'open connections' },
+      { id: 'db', x: 705, y: 160, icon: 'db', label: 'MongoDB', sub: 'idle' },
+    ],
+    steps: [
+      { tone: 'info', title: 'A complete request',
+        text: `HTTP headers end with an empty line. Only after that line does the server know the headers are done and start handling the request.`,
+        packets: [{ f: 'user', t: 'server', label: 'headers + empty line' }, { f: 'server', t: 'user', label: '200 OK' }],
+        slots: 'L_____',
+        states: { user: 'active', server: 'active', attacker: 'dim', db: 'dim' } },
+      { tone: 'bad', title: 'Headers that never end',
+        text: `The attacker opens a connection and sends the first header lines, but never the empty line that closes them.`,
+        packets: [{ f: 'attacker', t: 'server', label: 'part of headers' }],
+        slots: 'S_____',
+        states: { attacker: 'bad', server: 'active', user: 'dim', db: 'dim' } },
+      { tone: 'bad', title: 'One more header, now and then',
+        text: `Before the server gives up, the attacker sends one more header line. The connection never goes idle, so an idle timeout never fires. It does this on hundreds of connections.`,
+        packets: [{ f: 'attacker', t: 'server', label: '+ one header line', slow: true }],
+        slots: 'SSSS__',
+        states: { attacker: 'bad', server: 'bad', user: 'dim', db: 'dim' } },
+      { tone: 'bad', title: 'Server is full',
+        text: `Every connection is waiting for headers that never finish. Real users get no answer, even though the attacker sends almost no data.`,
+        packets: [{ f: 'user', t: 'server', label: 'GET /', tone: 'info' }, { f: 'server', t: 'user', label: 'no answer' }, { f: 'attacker', t: 'server', slow: true }],
+        slots: 'SSSSSS',
+        states: { attacker: 'bad', server: 'bad', user: 'bad', db: 'dim' } },
+      { tone: 'good', title: 'Fixed: headersTimeout',
+        text: `<code>server.headersTimeout</code> counts the total time from the first byte, not the idle time. If the headers are not done in 10 seconds, Node closes the connection.`,
+        packets: [{ f: 'server', t: 'attacker', label: '408 + close' }, { f: 'user', t: 'server', label: 'GET /', tone: 'info' }],
+        slots: 'L_____',
+        states: { attacker: 'dim', server: 'safe', user: 'active', db: 'dim' } },
+    ],
+  },
+};
+
+(function () {
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const NODE_W = 136, NODE_H = 78;
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const all = [];
+
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(SVGNS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  function laptop(g, x, y, s, screenCls) {
+    el('rect', { x: x - 12 * s, y: y - 14 * s, width: 24 * s, height: 15 * s, rx: 2 * s, class: screenCls }, g);
+    el('path', { d: `M${x - 16 * s},${y + 3 * s} h${32 * s} l${-2 * s},${3 * s} h${-28 * s} z`, class: 'ic' }, g);
+  }
+
+  const ICONS = {
+    server(g) {
+      el('rect', { x: -13, y: -28, width: 26, height: 10, rx: 2, class: 'ic' }, g);
+      el('rect', { x: -13, y: -15, width: 26, height: 10, rx: 2, class: 'ic' }, g);
+      el('circle', { cx: -7.5, cy: -23, r: 1.7, class: 'ic-dot' }, g);
+      el('circle', { cx: -7.5, cy: -10, r: 1.7, class: 'ic-dot' }, g);
+      el('path', { d: 'M1,-23 h8 M1,-10 h8', class: 'ic-line' }, g);
+    },
+    db(g) {
+      el('path', { d: 'M-11,-25 v18 a11,4 0 0 0 22,0 v-18', class: 'ic' }, g);
+      el('ellipse', { cx: 0, cy: -25, rx: 11, ry: 4, class: 'ic' }, g);
+      el('path', { d: 'M-11,-16 a11,4 0 0 0 22,0', class: 'ic-line' }, g);
+    },
+    browser(g) {
+      el('rect', { x: -15, y: -28, width: 30, height: 22, rx: 2.5, class: 'ic' }, g);
+      el('path', { d: 'M-15,-22 h30', class: 'ic-line' }, g);
+      [-11, -8, -5].forEach((cx) => el('circle', { cx, cy: -25, r: 1, class: 'ic-dot' }, g));
+    },
+    site(g) {
+      el('rect', { x: -15, y: -28, width: 30, height: 22, rx: 2.5, class: 'ic' }, g);
+      el('rect', { x: -15, y: -28, width: 30, height: 6, rx: 2.5, class: 'ic-bad' }, g);
+      el('path', { d: 'M0,-18 v6 M0,-9.5 v0.5', class: 'ic-line' }, g);
+    },
+    attacker(g) { laptop(g, 0, -12, 1, 'ic-bad'); },
+    bots(g) {
+      laptop(g, -16, -16, 0.6, 'ic-bad');
+      laptop(g, 16, -16, 0.6, 'ic-bad');
+      laptop(g, 0, -8, 0.6, 'ic-bad');
+    },
+    shield(g) {
+      el('path', { d: 'M0,-29 L12,-25 V-17 C12,-10 6,-6 0,-4 C-6,-6 -12,-10 -12,-17 V-25 Z', class: 'ic' }, g);
+      el('path', { d: 'M-5,-17 l4,4 l7,-8', class: 'ic-good' }, g);
+    },
+  };
+
+  function drawNode(layer, n) {
+    const w = n.w || NODE_W;
+    const g = el('g', { class: 'dg-node', transform: `translate(${n.x},${n.y})` }, layer);
+    el('rect', { x: -w / 2, y: -NODE_H / 2, width: w, height: NODE_H, rx: 10, class: 'dg-box' }, g);
+    ICONS[n.icon](g);
+    const t = el('text', { x: 0, y: 14, class: 'dg-label', 'text-anchor': 'middle' }, g);
+    t.textContent = n.label;
+    const s = el('text', { x: 0, y: 29, class: 'dg-sub', 'text-anchor': 'middle' }, g);
+    s.textContent = n.sub;
+    return g;
+  }
+
+  function geom(a, b, lane) {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const hwA = (a.w || NODE_W) / 2 + 6, hwB = (b.w || NODE_W) / 2 + 6, hh = NODE_H / 2 + 6;
+    const tA = Math.min(dx ? hwA / Math.abs(dx) : Infinity, dy ? hh / Math.abs(dy) : Infinity);
+    const tB = Math.min(dx ? hwB / Math.abs(dx) : Infinity, dy ? hh / Math.abs(dy) : Infinity);
+    const px = -uy, py = ux, off = lane * 16;
+    return {
+      sx: a.x + dx * tA + px * off, sy: a.y + dy * tA + py * off,
+      ex: b.x - dx * tB + px * off, ey: b.y - dy * tB + py * off,
+    };
+  }
+
+  function build(host) {
+    const key = host.dataset.diagram;
+    const cfg = DIAGRAMS[key];
+    if (!cfg) return;
+    const n = cfg.steps.length;
+
+    host.innerHTML =
+      `<div class="dg-head"><span class="dg-live">Attack flow</span><span class="dg-name">${cfg.name}</span></div>` +
+      `<div class="dg-stage"></div>` +
+      (cfg.slots ? `<div class="dg-legend"><span><i class="lg-L"></i>real user</span><span><i class="lg-A"></i>attack request</span><span><i class="lg-S"></i>stuck, waiting</span><span><i class="lg-free"></i>free</span></div>` : '') +
+      `<div class="dg-caption" aria-live="polite"></div>` +
+      `<div class="dg-controls">` +
+        `<button type="button" class="dg-btn" data-act="prev">← Back</button>` +
+        `<div class="dg-dots">${cfg.steps.map((_, i) => `<button type="button" class="dg-dot-btn" data-go="${i}" aria-label="Go to step ${i + 1}"></button>`).join('')}</div>` +
+        `<span class="dg-counter"></span>` +
+        `<button type="button" class="dg-btn dg-btn-primary" data-act="next">Next →</button>` +
+      `</div>`;
+
+    const stage = host.querySelector('.dg-stage');
+    const svg = el('svg', { viewBox: `0 0 ${cfg.w} ${cfg.h}`, role: 'img', 'aria-label': cfg.name + ' flow diagram' });
+    stage.appendChild(svg);
+
+    const defs = el('defs', {}, svg);
+    ['bad', 'good', 'info'].forEach((t) => {
+      const m = el('marker', { id: `m-${key}-${t}`, viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs);
+      el('path', { d: 'M0,0 L10,5 L0,10 z', class: `dg-arrow tone-${t}` }, m);
+    });
+
+    const lineLayer = el('g', {}, svg);
+    const nodeLayer = el('g', {}, svg);
+    const dotLayer = el('g', {}, svg);
+    const pillLayer = el('g', {}, svg);
+
+    const nodes = {};
+    cfg.nodes.forEach((nd) => { nodes[nd.id] = Object.assign({}, nd, { g: drawNode(nodeLayer, nd) }); });
+
+    const slotEls = [];
+    if (cfg.slots) {
+      const sn = nodes[cfg.slots.on];
+      const c = cfg.slots.count, sw = 13, gap = 4;
+      const total = c * sw + (c - 1) * gap;
+      const y = sn.y + NODE_H / 2 + 10;
+      for (let i = 0; i < c; i++) {
+        slotEls.push(el('rect', { x: sn.x - total / 2 + i * (sw + gap), y, width: sw, height: 10, rx: 2, class: 'dg-slot slot-free' }, svg));
+      }
+      const lbl = el('text', { x: sn.x, y: y + 24, class: 'dg-slot-label', 'text-anchor': 'middle' }, svg);
+      lbl.textContent = 'connection slots';
+    }
+
+    const st = {
+      cfg, key, host, nodes, lineLayer, dotLayer, pillLayer, slotEls, step: 0, anims: [], visible: true,
+      caption: host.querySelector('.dg-caption'),
+      counter: host.querySelector('.dg-counter'),
+      prev: host.querySelector('[data-act="prev"]'),
+      next: host.querySelector('[data-act="next"]'),
+      dots: Array.from(host.querySelectorAll('.dg-dot-btn')),
+    };
+
+    st.prev.addEventListener('click', () => go(st, st.step - 1));
+    st.next.addEventListener('click', () => go(st, st.step >= n - 1 ? 0 : st.step + 1));
+    st.dots.forEach((d) => d.addEventListener('click', () => go(st, Number(d.dataset.go))));
+    host.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { go(st, Math.min(n - 1, st.step + 1)); }
+      if (e.key === 'ArrowLeft') { go(st, Math.max(0, st.step - 1)); }
+    });
+
+    render(st);
+    all.push(st);
+  }
+
+  function go(st, i) {
+    const n = st.cfg.steps.length;
+    st.step = Math.max(0, Math.min(n - 1, i));
+    render(st);
+  }
+
+  function render(st) {
+    const cfg = st.cfg, s = cfg.steps[st.step], n = cfg.steps.length;
+    const states = s.states || {};
+
+    Object.keys(st.nodes).forEach((id) => {
+      st.nodes[id].g.setAttribute('class', 'dg-node' + (states[id] ? ' is-' + states[id] : ''));
+    });
+
+    st.lineLayer.textContent = '';
+    st.dotLayer.textContent = '';
+    st.pillLayer.textContent = '';
+    st.anims = [];
+
+    const pk = s.packets || [];
+    const now = performance.now();
+    pk.forEach((p, i) => {
+      const a = st.nodes[p.f], b = st.nodes[p.t];
+      let lane = p.lane;
+      if (lane === undefined) lane = pk.some((q) => q.f === p.t && q.t === p.f) ? 1 : 0;
+      const g = geom(a, b, lane);
+      const tone = p.tone || s.tone;
+      const path = el('path', {
+        d: `M${g.sx.toFixed(1)},${g.sy.toFixed(1)} L${g.ex.toFixed(1)},${g.ey.toFixed(1)}`,
+        class: `dg-line tone-${tone}`,
+        'marker-end': `url(#m-${st.key}-${tone})`,
+      }, st.lineLayer);
+      const dot = el('circle', { r: 4.5, class: `dg-dot tone-${tone}`, cx: g.sx, cy: g.sy }, st.dotLayer);
+
+      if (p.label) {
+        const mx = (g.sx + g.ex) / 2, my = (g.sy + g.ey) / 2;
+        const pg = el('g', { transform: `translate(${mx.toFixed(1)},${my.toFixed(1)})` }, st.pillLayer);
+        const rect = el('rect', { y: -9.5, height: 19, rx: 9.5, class: `dg-pill tone-${tone}` }, pg);
+        const tx = el('text', { y: 3.5, 'text-anchor': 'middle', class: 'dg-pill-text' }, pg);
+        tx.textContent = p.label;
+        let w = 0;
+        try { w = tx.getComputedTextLength(); } catch (e) { w = 0; }
+        if (!w) w = p.label.length * 6.1;
+        rect.setAttribute('x', (-(w / 2) - 9).toFixed(1));
+        rect.setAttribute('width', (w + 18).toFixed(1));
+      }
+
+      const len = path.getTotalLength();
+      const dur = p.slow ? 5200 : 1700;
+      st.anims.push({ path, dot, len, dur, start: now + i * 420 });
+      if (reduced) {
+        const pt = path.getPointAtLength(len * 0.85);
+        dot.setAttribute('cx', pt.x);
+        dot.setAttribute('cy', pt.y);
+      }
+    });
+
+    if (cfg.slots && s.slots) {
+      st.slotEls.forEach((r, i) => {
+        const c = s.slots[i] || '_';
+        r.setAttribute('class', 'dg-slot ' + (c === '_' ? 'slot-free' : 'slot-' + c));
+      });
+    }
+
+    const badge = s.tone === 'good' ? ['badge-green', 'Defense'] : s.tone === 'info' ? ['badge-blue', 'Normal'] : ['badge-accent', 'Attack'];
+    st.caption.innerHTML =
+      `<div class="dg-cap-head"><span class="badge ${badge[0]}">${badge[1]}</span><span class="dg-step-title">${s.title}</span></div>` +
+      `<p class="dg-text">${s.text}</p>`;
+
+    st.counter.textContent = `Step ${st.step + 1} / ${n}`;
+    st.prev.disabled = st.step === 0;
+    st.next.textContent = st.step === n - 1 ? 'Restart ↺' : 'Next →';
+    st.dots.forEach((d, i) => {
+      d.classList.toggle('on', i === st.step);
+      d.classList.toggle('done', i < st.step);
+      d.setAttribute('aria-current', i === st.step ? 'step' : 'false');
+    });
+  }
+
+  function loop(now) {
+    for (const st of all) {
+      if (!st.visible) continue;
+      for (const a of st.anims) {
+        if (now < a.start) { a.dot.setAttribute('opacity', 0); continue; }
+        const t = ((now - a.start) / a.dur) % 1;
+        const pt = a.path.getPointAtLength(t * a.len);
+        a.dot.setAttribute('cx', pt.x.toFixed(1));
+        a.dot.setAttribute('cy', pt.y.toFixed(1));
+        a.dot.setAttribute('opacity', t < 0.08 ? (t / 0.08).toFixed(2) : t > 0.9 ? ((1 - t) / 0.1).toFixed(2) : 1);
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+
+  document.querySelectorAll('.attack-diagram[data-diagram]').forEach(build);
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        const st = all.find((x) => x.host === e.target);
+        if (st) st.visible = e.isIntersecting;
+      });
+    });
+    all.forEach((st) => io.observe(st.host));
+  }
+
+  if (!reduced) requestAnimationFrame(loop);
+
+  // re-measure label pills once the mono font has loaded
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => all.forEach(render));
+  }
+})();
+
+/* ════════════ Active nav link on scroll ════════════ */
+(function () {
+  const links = Array.from(document.querySelectorAll('.nav-link'));
+  const byId = {};
+  links.forEach((l) => { byId[l.getAttribute('href').slice(1)] = l; });
+  const setActive = (id) => {
+    links.forEach((l) => l.classList.toggle('active', l === byId[id]));
+    const link = byId[id];
+    const list = document.querySelector('.nav-list');
+    if (link && list && list.scrollWidth > list.clientWidth) {
+      list.scrollTo({ left: link.offsetLeft - 16, behavior: 'smooth' });
+    }
+  };
+  if (!('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); });
+  }, { rootMargin: '-35% 0px -60% 0px' });
+  document.querySelectorAll('.section-block[id]').forEach((s) => io.observe(s));
+})();
+</script>
+
+</body></html>
